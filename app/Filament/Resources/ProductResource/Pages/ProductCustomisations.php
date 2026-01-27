@@ -28,6 +28,8 @@ class ProductCustomisations extends Page
 
     public $pricingType = 'fixed';
 
+    public $rules = [];
+
     public function mount(int | string $record): void
     {
         $this->record = $this->resolveRecord($record);
