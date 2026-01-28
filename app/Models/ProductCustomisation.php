@@ -11,8 +11,18 @@ use Lunar\Facades\AttributeManifest;
 class ProductCustomisation extends BaseModel implements Contracts\ProductCustomisation
 {
 
+    protected $fillable = [
+        'required',
+        'min',
+        'max',
+        'attribute_data',
+        'attribute_id',
+        'product_id',
+        'position'
+    ];
+
     protected $casts = [
-        'value' => 'array',
+        'attribute_data' => 'array',
     ];
 
     public function product(): BelongsTo

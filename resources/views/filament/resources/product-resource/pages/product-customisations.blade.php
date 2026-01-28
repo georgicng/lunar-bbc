@@ -6,8 +6,9 @@
         x-data="{
             fields: $wire.fields,
             model: $wire.model,
-            active: $wire.model[0]?.option_id,
-            dynamicPricing: $wire.pricingType === 'dynamic',
+            active: $wire.model[0]?.attribute_id,
+            pricingType: $wire.pricingType,
+            get dynamicPricing() { return this.pricingType === 'dynamic' },
             assignOption: null,
             hasUnassignedOptions(fieldId) {
                 return this.getUnassignedOptions(fieldId)?.length > 0;
@@ -16,7 +17,7 @@
                 if (!this.fields[fieldId]?.configuration?.lookups) {
                     return [];
                 }
-                const assignedOptionIds = this.model.find(f => f.option_id === fieldId)?.value.map(o => o.id) || [];
+                const assignedOptionIds = this.model.find(f => f.attribute_id === fieldId)?.attribute_data.map(o => o.id) || [];
                 return this.fields[fieldId].configuration.lookups.filter(f => !assignedOptionIds.includes(f.value)).map(o => ({
                     id: o.value,
                     name: o.label,
@@ -26,10 +27,10 @@
                 if (!optionId) {
                     return;
                 }
-                const field = this.model.find(f => f.option_id === fieldId);
+                const field = this.model.find(f => f.attribute_id === fieldId);
                 const option = this.fields[fieldId].configuration.lookups.find(o => o.value === optionId);
                 if (field && option) {
-                    field.value.push({
+                    field.attribute_data.push({
                         id: option.value,
                         name: option.label,
                         prefix: '+',
@@ -39,11 +40,11 @@
                 }
             },
             addAll(fieldId) {
-                const field = this.model.find(f => f.option_id === fieldId);
+                const field = this.model.find(f => f.attribute_id === fieldId);
                 const unassignedOptions = this.getUnassignedOptions(fieldId);
                 if (field) {
                     unassignedOptions.forEach(option => {
-                        field.value.push({
+                        field.attribute_data.push({
                             ...option,
                             prefix: '+',
                             price: '0',
@@ -54,13 +55,13 @@
             },
             remove(optionId) {
                 this.model.forEach(field => {
-                    field.value = field.value.filter(o => o.id !== optionId);
+                    field.attribute_data = field.attribute_data.filter(o => o.id !== optionId);
                 });
             },
             removeAll(fieldId) {
                 const field = this.model.find(f => f.id === fieldId);
                 if (field) {
-                    field.value = [];
+                    field.attribute_data = [];
                 }
             },
             rules: $wire.rules,
@@ -131,14 +132,21 @@
                 this.rules.splice(index, 1);
             },
         }"
-        >
+        x-init="$watch('rules', (value, oldValue) => console.log(value, oldValue))">
         <!--Toggle Pricing -->
         <div>
-            <label for="AcceptConditions" class="relative block h-8 w-14 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:transparent] has-checked:bg-green-500">
-                <input type="checkbox" x-model="dynamicPricing" id="AcceptConditions" class="peer sr-only">
-
-                <span class="absolute inset-y-0 start-0 m-1 size-6 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-6"></span>
-            </label>
+            <label>
+                Pricing Type </label>
+            <select
+                x-model="pricingType"
+                class="custom-select flex w-full min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400">
+                <option value="fixed">
+                    Fixed
+                </option>
+                <option value="dynamic">
+                    Dynamic
+                </option>
+            </select>
         </div>
         <!-- End Toggle Pricing -->
 
@@ -147,15 +155,15 @@
             <!-- Nav Tabs -->
             <div class="border-r border-gray-200">
                 <div role="tablist" class="-mr-px flex flex-col gap-1">
-                    <template x-for="(field, index) in model" :key="field.option_id">
+                    <template x-for="(field, index) in model" :key="field.attribute_id">
                         <button
-                            x-text="fields[field.option_id].name?.en"
-                            x-on:click="active = field.option_id"
+                            x-text="fields[field.attribute_id].name?.en"
+                            x-on:click="active = field.attribute_id"
                             type="button"
                             role="tab"
-                            x-bind:aria-selected="active !==  field.option_id"
+                            x-bind:aria-selected="active !==  field.attribute_id"
                             class="border-r-2 px-4 py-2 text-left text-sm font-medium  transition-colors"
-                            x-bind:class="{ 'border-blue-600 text-blue-600  hover:text-blue-700': active ===  field.option_id, 'border-transparent text-gray-600 hover:text-gray-700': active !==  field.option_id }">
+                            x-bind:class="{ 'border-blue-600 text-blue-600  hover:text-blue-700': active ===  field.attribute_id, 'border-transparent text-gray-600 hover:text-gray-700': active !==  field.attribute_id }">
                         </button>
                     </template>
                 </div>
@@ -166,13 +174,13 @@
             <div role="tabpanel" class="flex-1">
                 <template x-for="(field, index) in model">
                     <div
-                        x-show="active === field.option_id"
+                        x-show="active === field.attribute_id"
                         tab="tabpanel"
                         tabindex="0"
                         class="text-gray-700">
-                        <template x-if="['Lunar\\FieldTypes\\Text'].includes(fields[field.option_id].type)">
+                        <template x-if="['Lunar\\FieldTypes\\Text'].includes(fields[field.attribute_id].type)">
                             <div class="flex-column gap-2.5 justify-between px-4 py-6 border-b border-slate-300 dark:border-gray-800">
-                                <h2 x-text="fields[field.option_id].name?.en" class="font-medium text-base text-gray-700 dark"></h2>
+                                <h2 x-text="fields[field.attribute_id].name?.en" class="font-medium text-base text-gray-700 dark"></h2>
 
                                 <div>
                                     <label>
@@ -180,7 +188,7 @@
                                     </label>
                                     <input
                                         class="w-full py-2.5 px-3 border rounded-md text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
-                                        x-model="field.value.default" />
+                                        x-model="field.attribute_data.default" />
                                 </div>
                                 <template x-show="!dynamicPricing">
                                     <div>
@@ -190,7 +198,7 @@
                                         <div class="flex">
                                             <select
                                                 class="w-[20%] flex min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 mr-4"
-                                                x-model="field.value.prefix">
+                                                x-model="field.attribute_data.prefix">
                                                 <option value="+">
                                                     +
                                                 </option>
@@ -201,7 +209,7 @@
                                             <input
                                                 type="text"
                                                 class="w-[60%] py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
-                                                x-model="field.value.price" />
+                                                x-model="field.attribute_data.price" />
                                         </div>
                                     </div>
                                 </template>
@@ -240,9 +248,9 @@
                                 </div>
                             </div>
                         </template>
-                        <template x-if="['Lunar\\FieldTypes\\Dropdown'].includes(fields[field.option_id].type)">
+                        <template x-if="['Lunar\\FieldTypes\\Dropdown'].includes(fields[field.attribute_id].type)">
                             <div class="flex-column gap-2.5 justify-between px-4 py-6 border-b border-slate-300 dark:border-gray-800">
-                                <h2 x-text="fields[field.option_id].name?.en" class="font-medium text-base text-gray-700 dark"></h2>
+                                <h2 x-text="fields[field.attribute_id].name?.en" class="font-medium text-base text-gray-700 dark"></h2>
 
                                 <div>
                                     <table class="table-auto">
@@ -255,40 +263,42 @@
                                             </tr>
                                         </thead>
                                         <tbody x-sort="alert($item + ' - ' + $position)">
-                                            <template x-for="(option, index) in field.value">
+                                            <template x-for="(option, index) in field.attribute_data">
                                                 <tr x-sort:item="option.id">
                                                     <th scope="row"> <i class="icon-drag text-[20px] transition-all group-hover:text-gray-700"></i> </th>
                                                     <td class="px-6 py-4" x-text="option.name">
                                                     </td>
-                                                    <td v-show="!dynamicPricing" class="px-6 py-4">
-                                                        <div class="flex">
-                                                            <select
-                                                                class="flex w-1/2 min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400"
-                                                                x-model="field.value[index].prefix">
-                                                                <option value="+">
-                                                                    +
-                                                                </option>
-                                                                <option value="-">
-                                                                    -
-                                                                </option>
-                                                            </select>
-                                                            <input
-                                                                type="text"
-                                                                class="w-1/2 py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
-                                                                x-model="field.value[index].price" />
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-6 py-4"><button type="button" x-on:click="remove(field.option_id, option.id)"><span class="icon-delete text-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-950 hover:rounded-md"></span></button></td>
+                                                    <template x-show="!dynamicPricing">
+                                                        <td class="px-6 py-4">
+                                                            <div class="flex">
+                                                                <select
+                                                                    class="flex w-1/2 min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400"
+                                                                    x-model="field.attribute_data[index].prefix">
+                                                                    <option value="+">
+                                                                        +
+                                                                    </option>
+                                                                    <option value="-">
+                                                                        -
+                                                                    </option>
+                                                                </select>
+                                                                <input
+                                                                    type="text"
+                                                                    class="w-1/2 py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
+                                                                    x-model="field.attribute_data[index].price" />
+                                                            </div>
+                                                        </td>
+                                                    </template>
+                                                    <td class="px-6 py-4"><button type="button" x-on:click="remove(field.attribute_id, option.id)"><span class="icon-delete text-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-950 hover:rounded-md"></span></button></td>
                                                 </tr>
                                             </template>
 
-                                            <template x-if="!field.value.length">
+                                            <template x-if="!field.attribute_data.length">
                                                 <tr>
                                                     <td colspan="3">Please add an option item to begin</td>
                                                 </tr>
                                             </template>
                                         </tbody>
-                                        <template x-if="hasUnassignedOptions(field.option_id)">
+                                        <template x-if="hasUnassignedOptions(field.attribute_id)">
                                             <tfoot>
                                                 <tr>
                                                     <th scope="row" colspan="2">
@@ -297,16 +307,16 @@
                                                             class="custom-select flex w-full min-h-[39px] py-[6px] px-[12px] bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-[6px] text-[14px] text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400"
                                                             label="required">
                                                             <option value="">Select an option</option>
-                                                            <template x-for="item in getUnassignedOptions(field.option_id)">
+                                                            <template x-for="item in getUnassignedOptions(field.attribute_id)">
                                                                 <option x-bind:value="item.id" x-text="item.name">
                                                                 </option>
                                                             </template>
                                                         </select>
                                                     </th>
                                                     <td class="px-6 py-4">
-                                                        <button class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" x-on:click="addOption(field.option_id, assignOption)">Add</button>
-                                                        <template x-if="getUnassignedOptions(field.option_id).length > 1">
-                                                            <button class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" x-on:click="addAll(field.option_id)">Add all</button>
+                                                        <button class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" x-on:click="addOption(field.attribute_id, assignOption)">Add</button>
+                                                        <template x-if="getUnassignedOptions(field.attribute_id).length > 1">
+                                                            <button class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" x-on:click="addAll(field.attribute_id)">Add all</button>
                                                         </template>
                                                     </td>
                                                 </tr>
@@ -382,7 +392,7 @@
                     <!-- ====== Rules -->
                     <div x-data="{ openItem: 0 }" class="space-y-2">
 
-                        <template x-for="(rule, index) in rules">
+                        <template x-for="(rule, index) in rules" :key="rule.id">
                             <!-- Accordion:  Rule -->
                             <details class="group [&amp;_summary::-webkit-details-marker]:hidden">
                                 <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3 font-medium text-gray-900 hover:bg-gray-50">
@@ -429,17 +439,17 @@
                                                 </div>
                                                 <!-- Conditions -->
                                                 <div class="rounded box-shadow mb-4">
-                                                    <template x-for="(condition, _index) in rule.conditions">
+                                                    <template x-for="(condition, _index) in rule.conditions" :key="condition.id">
                                                         <div class="flex p-3 gap-4 justify-between mt-4">
                                                             <div class="flex gap-4 flex-1 max-sm:flex-wrap max-sm:flex-1">
                                                                 <select
                                                                     x-model="rules[index].conditions[_index].field"
                                                                     class="custom-select flex w-1/3 min:w-1/3 h-10 py-2.5 px-3 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 dark:hover:border-gray-400 max-sm:flex-auto max-sm:max-w-full">
                                                                     <option value="">
-                                                                        Selection field
+                                                                        Select field
                                                                     </option>
-                                                                    <template x-for="field in model" x-bind:key="field.option_id">
-                                                                        <option x-bind:value="field.option_id" x-text="fields[field.option_id].name.en">
+                                                                    <template x-for="field in model" x-bind:key="field.attribute_id">
+                                                                        <option x-bind:value="field.attribute_id" x-text="fields[field.attribute_id].name.en">
                                                                         </option>
                                                                     </template>
                                                                 </select>
@@ -448,9 +458,9 @@
                                                                     x-model="rules[index].conditions[_index].operator"
                                                                     class="custom-select inline-flex gap-x-1 justify-between items-center h-10 w-full max-w-[196px] py-2.5 px-3 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 dark:hover:border-gray-400 max-sm:flex-auto max-sm:max-w-full">
                                                                     <option value="">
-                                                                        Selection operator
+                                                                        Select operator
                                                                     </option>
-                                                                    <template x-for="item in operators[fields[condition?.field]?.type]" x-bind:key="item">
+                                                                    <template x-for="item in operators[fields[condition?.field]?.type]" :key="item">
                                                                         <option x-bind:value="item" x-text="item">
                                                                         </option>
                                                                     </template>
@@ -475,7 +485,10 @@
                                                                         <select
                                                                             x-model="rules[index].conditions[_index].value"
                                                                             class="custom-select inline-flex gap-x-1 justify-between items-center h-10 w-[196px] max-w-[196px] py-2.5 px-3 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 dark:hover:border-gray-400">
-                                                                            <template x-for="item in model.find(item => item.option_id == condition.field).value" x-bind:key="item.id">
+                                                                            <option value="">
+                                                                                Select value
+                                                                            </option>
+                                                                            <template x-for="item in model.find(item => item.attribute_id == condition.field).value" :key="item.id">
                                                                                 <option x-bind:value="item.id" x-text="item.name">
                                                                                 </option>
                                                                             </template>
@@ -487,7 +500,7 @@
                                                                             class="custom-select inline-flex gap-x-1 justify-between items-center w-[196px] max-w-[196px] py-2.5 px-3 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 dark:hover:border-gray-400"
                                                                             multiple
                                                                             size="5">
-                                                                            <template x-for="item in model.find(item => item.option_id == condition.field).value" x-bind:key="item.id">
+                                                                            <template x-for="item in model.find(item => item.attribute_id == condition.field).value" :key="item.id">
                                                                                 <option x-bind:value="item.id" x-text="item.name">
                                                                                 </option>
                                                                             </template>
@@ -495,10 +508,11 @@
                                                                     </template>
                                                                 </div>
                                                             </div>
-                                                            <span
+                                                            <button
+                                                                type="button"
                                                                 class="icon-delete max-h-9 max-w-9 text-2xl p-1.5 rounded-md cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-950 max-sm:place-self-center"
                                                                 x-on:click="deleteRuleCondition(index, condition.id)">
-                                                            </span>
+                                                            </button>
                                                         </div>
                                                     </template>
                                                 </div>
@@ -543,6 +557,10 @@
             </div>
             <!-- END Panel -->
         </template>
+
+        <button x-on:click="$wire.saveCustom()" class="relative border-black bg-white px-5 py-3 font-semibold text-black after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-black hover:text-white hover:after:h-full focus:ring-2 focus:ring-yellow-300 focus:outline-0" href="#">
+            <span class="relative z-10"> Submit </span>
+        </button>
 
     </div>
 </x-filament-panels::page>

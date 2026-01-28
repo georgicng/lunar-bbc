@@ -7,9 +7,9 @@ use Lunar\Admin\Support\Facades\LunarPanel;
 use Lunar\Facades\AttributeManifest;
 use Lunar\Facades\ModelManifest;
 use App\Models\Contracts\ProductCustomisation as ProductCustomisationInterface;
-use Lunar\Models\Product;
+//use Lunar\Models\Product;
 use Lunar\Models\ProductType;
-
+use App\Models\Product;
 use App\Models\ProductCustomisation;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,10 +37,15 @@ class AppServiceProvider extends ServiceProvider
         ); */
         AttributeManifest::addtype(ProductCustomisation::class);
 
-        Product::resolveRelationUsing('customisations', function ($productModel) {
+        ModelManifest::replace(
+            \Lunar\Models\Contracts\Product::class,
+            Product::class,
+        );
+
+       /*  Product::resolveRelationUsing('customisations', function ($productModel) {
             //return $productModel->hasMany(ProductCustomisation::class, 'customisation_id');
             return $productModel->hasMany(ProductCustomisation::modelClass());
-        });
+        }); */
 
         ProductType::resolveRelationUsing('customisationAttributes', function ($productTypeModel) {
             return $productTypeModel->mappedAttributes()->whereAttributeType(
