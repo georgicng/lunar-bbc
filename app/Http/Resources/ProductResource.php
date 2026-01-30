@@ -24,7 +24,8 @@ class ProductResource extends JsonResource
                 "meta" => $this->images[0]->custom_properties
 
             ],
-            "price" => $this->variants[0]->prices[0]->price->value
+            "price" => $this->variants[0]->prices[0]->price->value,
+            "customisations" => $this->customisations,
         ];
     }
 }

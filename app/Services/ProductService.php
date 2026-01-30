@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Lunar\Models\Product;
+use App\Models\Product;
 use Lunar\Models\Collection;
 
 class ProductService
@@ -35,6 +35,7 @@ class ProductService
             'variants.basePrices.currency',
             'variants.basePrices.priceable',
             'collections',
+            'customisations',
         ])->first();
     }
 }

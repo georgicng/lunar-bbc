@@ -11,22 +11,19 @@ Route::get('/', function () {
     return Inertia::render('Home');
 });
 
-Route::get('/categories', function () {
-    $service = new ProductService();
+Route::get('/categories', function (ProductService $service) {
     return Inertia::render('Category', [
         'categories' => CategoryResource::collection($service->getCategories()),
     ]);
 });
-Route::get('/products', function () {
-    $service = new ProductService();
+Route::get('/products', function (ProductService $service) {
     return Inertia::render('Products', [
         'products' => ProductResource::collection($service->getProducts(request()->query('category', null))),
     ]);
 });
-Route::get('/products/:id', function ($id) {
-    $service = new ProductService();
+Route::get('/products/{id}', function (int $id, ProductService $service) {
     return Inertia::render('Product', [
-        'product' => $service->getProduct($id),
+        'product' => new ProductResource($service->getProduct($id)),
     ]);
 });
 Route::get('/cart', function () {

@@ -1,3 +1,13 @@
+<script setup>
+import { Link } from "@inertiajs/vue3";
+defineProps({
+    product: {
+        type: Object,
+        required: true,
+    },
+});
+</script>
+
 <template>
   <div class="max-w-6xl w-full px-6">
     <p>
@@ -30,7 +40,7 @@
         </div>
 
         <div class="text-sm w-full md:w-1/2">
-            <h1 class="text-3xl font-medium">Casual Shoes</h1>
+            <h1 class="text-3xl font-medium">{{ product.data.name.en }}</h1>
 
             <div class="flex items-center gap-0.5 mt-1">
                 <svg width="14" height="13" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -52,17 +62,13 @@
             </div>
 
             <div class="mt-6">
-                <p class="text-gray-500/70 line-through">MRP: $100</p>
+                <p class="text-gray-500/70 line-through">MRP: {{ product.price }}</p>
                 <p class="text-2xl font-medium">MRP: $80</p>
                 <span class="text-gray-500/70">(inclusive of all taxes)</span>
             </div>
 
             <p class="text-base font-medium mt-6">About Product</p>
-            <ul class="list-disc ml-4 text-gray-500/70">
-                <li>High-quality material</li>
-                <li>Comfortable for everyday use</li>
-                <li>Available in different sizes</li>
-            </ul>
+            <div v-html="product.data.description.en"></div>
 
             <div class="flex items-center mt-10 gap-4 text-base">
                 <button class="w-full py-3.5 font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition cursor-pointer">
