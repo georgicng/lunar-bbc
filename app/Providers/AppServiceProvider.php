@@ -11,6 +11,7 @@ use App\Models\Contracts\ProductCustomisation as ProductCustomisationInterface;
 use Lunar\Models\ProductType;
 use App\Models\Product;
 use App\Models\ProductCustomisation;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,8 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         LunarPanel::extensions([
-            \Lunar\Admin\Filament\Resources\ProductTypeResource::class => \App\Extensions\Resources\ProductTypeResource::class,
             \Lunar\Admin\Filament\Resources\ProductResource::class => \App\Extensions\Resources\ProductResource::class,
+            \Lunar\Admin\Filament\Resources\ProductTypeResource::class => \App\Extensions\Resources\ProductTypeResource::class,
         ]);
         LunarPanel::register();
     }
@@ -31,21 +32,32 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        /*  ModelManifest::add(
-            ProductCustomisationInterface::class,
-            ProductCustomisation::class,
-        ); */
-        AttributeManifest::addtype(ProductCustomisation::class);
+        //override morph map to include product_customisation
+        //TODO: find better way to merge with existing morph map and confirm nothing breaks
+        Relation::enforceMorphMap([
+            'product' => \Lunar\Models\Product::class,
+            'product_variant' => \Lunar\Models\ProductVariant::class,
+            'product_option' => \Lunar\Models\ProductOption::class,
+            'product_option_value' => \Lunar\Models\ProductOptionValue::class,
+            'collection' => \Lunar\Models\Collection::class,
+            'customer' => \Lunar\Models\Customer::class,
+            'cart' => \Lunar\Models\Cart::class,
+            'cart_line' => \Lunar\Models\CartLine::class,
+            'order' => \Lunar\Models\Order::class,
+            'order_line' => \Lunar\Models\OrderLine::class,
+            'product_customisation' => ProductCustomisation::class,
+        ]);
 
         ModelManifest::replace(
             \Lunar\Models\Contracts\Product::class,
             Product::class,
         );
+        ModelManifest::add(
+            ProductCustomisationInterface::class,
+            ProductCustomisation::class,
+        );
 
-       /*  Product::resolveRelationUsing('customisations', function ($productModel) {
-            //return $productModel->hasMany(ProductCustomisation::class, 'customisation_id');
-            return $productModel->hasMany(ProductCustomisation::modelClass());
-        }); */
+        AttributeManifest::addtype(ProductCustomisation::class, 'product_customisation');
 
         ProductType::resolveRelationUsing('customisationAttributes', function ($productTypeModel) {
             return $productTypeModel->mappedAttributes()->whereAttributeType(

@@ -7,8 +7,7 @@
             fields: $wire.fields,
             model: $wire.model,
             active: $wire.model[0]?.attribute_id,
-            pricingType: $wire.pricingType,
-            get dynamicPricing() { return this.pricingType === 'dynamic' },
+            dynamicPricing: $wire.dynamicPricing,
             assignOption: null,
             hasUnassignedOptions(fieldId) {
                 return this.getUnassignedOptions(fieldId)?.length > 0;
@@ -136,17 +135,20 @@
         <!--Toggle Pricing -->
         <div>
             <label>
-                Pricing Type </label>
-            <select
-                x-model="pricingType"
-                class="custom-select flex w-full min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400">
-                <option value="fixed">
-                    Fixed
-                </option>
-                <option value="dynamic">
-                    Dynamic
-                </option>
-            </select>
+                Use Dynamic Pricing </label>
+            <label for="useDynamicPricing" class="group relative block h-8 w-14 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:transparent] has-checked:bg-green-500">
+                <input type="checkbox" id="useDynamicPricing" x-model="dynamicPricing" class="peer sr-only">
+
+                <span class="absolute inset-y-0 start-0 m-1 grid size-6 place-content-center rounded-full bg-white text-gray-700 transition-[inset-inline-start] peer-checked:start-6 peer-checked:*:first:hidden *:last:hidden peer-checked:*:last:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+                    </svg>
+
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
+                    </svg>
+                </span>
+            </label>
         </div>
         <!-- End Toggle Pricing -->
 
@@ -190,29 +192,27 @@
                                         class="w-full py-2.5 px-3 border rounded-md text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
                                         x-model="field.attribute_data.default" />
                                 </div>
-                                <template x-show="!dynamicPricing">
-                                    <div>
-                                        <label>
-                                            Price
-                                        </label>
-                                        <div class="flex">
-                                            <select
-                                                class="w-[20%] flex min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 mr-4"
-                                                x-model="field.attribute_data.prefix">
-                                                <option value="+">
-                                                    +
-                                                </option>
-                                                <option value="-">
-                                                    -
-                                                </option>
-                                            </select>
-                                            <input
-                                                type="text"
-                                                class="w-[60%] py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
-                                                x-model="field.attribute_data.price" />
-                                        </div>
+                                <div x-show="! dynamicPricing">
+                                    <label>
+                                        Price
+                                    </label>
+                                    <div class="flex">
+                                        <select
+                                            class="w-[20%] flex min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 mr-4"
+                                            x-model="field.attribute_data.prefix">
+                                            <option value="+">
+                                                +
+                                            </option>
+                                            <option value="-">
+                                                -
+                                            </option>
+                                        </select>
+                                        <input
+                                            type="text"
+                                            class="w-[60%] py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
+                                            x-model="field.attribute_data.price" />
                                     </div>
-                                </template>
+                                </div>
                                 <div>
                                     <label class="required">
                                         Required
@@ -258,7 +258,7 @@
                                             <tr>
                                                 <th scope="col"></th>
                                                 <th scope="col" class="px-6 py-4">Option Value</th>
-                                                <th scope="col" class="px-6 py-4" x-show="!dynamicPricing">Price</th>
+                                                <th scope="col" class="px-6 py-4" x-show="! dynamicPricing">Price</th>
                                                 <th scope="col" class="px-6 py-4"></th>
                                             </tr>
                                         </thead>
@@ -268,26 +268,24 @@
                                                     <th scope="row"> <i class="icon-drag text-[20px] transition-all group-hover:text-gray-700"></i> </th>
                                                     <td class="px-6 py-4" x-text="option.name">
                                                     </td>
-                                                    <template x-show="!dynamicPricing">
-                                                        <td class="px-6 py-4">
-                                                            <div class="flex">
-                                                                <select
-                                                                    class="flex w-1/2 min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400"
-                                                                    x-model="field.attribute_data[index].prefix">
-                                                                    <option value="+">
-                                                                        +
-                                                                    </option>
-                                                                    <option value="-">
-                                                                        -
-                                                                    </option>
-                                                                </select>
-                                                                <input
-                                                                    type="text"
-                                                                    class="w-1/2 py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
-                                                                    x-model="field.attribute_data[index].price" />
-                                                            </div>
-                                                        </td>
-                                                    </template>
+                                                    <td class="px-6 py-4" x-show="! dynamicPricing">
+                                                        <div class="flex">
+                                                            <select
+                                                                class="flex w-1/2 min-h-10 py-2.5 px-3.5 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-2.5 text-6 text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400"
+                                                                x-model="field.attribute_data[index].prefix">
+                                                                <option value="+">
+                                                                    +
+                                                                </option>
+                                                                <option value="-">
+                                                                    -
+                                                                </option>
+                                                            </select>
+                                                            <input
+                                                                type="text"
+                                                                class="w-1/2 py-2.5 px-3 border text-sm text-gray-600 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-400 focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:border-gray-800"
+                                                                x-model="field.attribute_data[index].price" />
+                                                        </div>
+                                                    </td>
                                                     <td class="px-6 py-4"><button type="button" x-on:click="remove(field.attribute_id, option.id)"><span class="icon-delete text-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-950 hover:rounded-md"></span></button></td>
                                                 </tr>
                                             </template>
@@ -488,7 +486,7 @@
                                                                             <option value="">
                                                                                 Select value
                                                                             </option>
-                                                                            <template x-for="item in model.find(item => item.attribute_id == condition.field).value" :key="item.id">
+                                                                            <template x-for="item in model.find(item => item.attribute_id == condition.field).attribute_data" :key="item.id">
                                                                                 <option x-bind:value="item.id" x-text="item.name">
                                                                                 </option>
                                                                             </template>
@@ -500,7 +498,7 @@
                                                                             class="custom-select inline-flex gap-x-1 justify-between items-center w-[196px] max-w-[196px] py-2.5 px-3 bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-300 font-normal transition-all hover:border-gray-400 dark:hover:border-gray-400"
                                                                             multiple
                                                                             size="5">
-                                                                            <template x-for="item in model.find(item => item.attribute_id == condition.field).value" :key="item.id">
+                                                                            <template x-for="item in model.find(item => item.attribute_id == condition.field).attribute_data" :key="item.id">
                                                                                 <option x-bind:value="item.id" x-text="item.name">
                                                                                 </option>
                                                                             </template>
@@ -510,8 +508,11 @@
                                                             </div>
                                                             <button
                                                                 type="button"
-                                                                class="icon-delete max-h-9 max-w-9 text-2xl p-1.5 rounded-md cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-950 max-sm:place-self-center"
+                                                                class="max-h-9 max-w-9 text-2xl p-1.5 rounded-md cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-950 max-sm:place-self-center"
                                                                 x-on:click="deleteRuleCondition(index, condition.id)">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
+                                                                </svg>
                                                             </button>
                                                         </div>
                                                     </template>

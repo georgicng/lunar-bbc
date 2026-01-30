@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import laravel, { refreshPaths } from "laravel-vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
+import vue from '@vitejs/plugin-vue';
 
 const port = 5173;
 const origin = `${process.env.DDEV_PRIMARY_URL}:${port}`;
@@ -17,6 +18,7 @@ export default defineConfig({
             ],
             refresh: [...refreshPaths, "app/Livewire/**"],
         }),
+        vue(),
         tailwindcss(),
     ],
     server: {

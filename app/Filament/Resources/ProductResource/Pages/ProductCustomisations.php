@@ -26,7 +26,7 @@ class ProductCustomisations extends Page
     public $model;
     public $fields;
 
-    public $pricingType;
+    public $dynamicPricing;
 
     public $rules;
 
@@ -35,8 +35,8 @@ class ProductCustomisations extends Page
         $this->record = $this->resolveRecord($record);
         $this->fields = $this->customisationAttributes->toArray();
         $this->model = $this->mapValues->toArray();
-        $this->pricingType = $this->config['pricing_type'];
-        $this->rules = $this->config['rules'];
+        $this->dynamicPricing= $this->config['dynamic_pricing'] ?? false;
+        $this->rules = $this->config['rules'] ?? [];
     }
 
 
@@ -87,7 +87,7 @@ class ProductCustomisations extends Page
     #[Computed]
     public function config()
     {
-        return $this->record->meta['config'] ?? ['rules' => [], 'pricing_type' => 'fixed'];
+        return $this->record->meta['config'] ?? ['rules' => [], 'dynamic_pricing' => false];
     }
 
     public function saveCustom()
@@ -110,7 +110,7 @@ class ProductCustomisations extends Page
         if (!isset($this->record->meta)) {
             $this->record->meta = [];
         }
-        $this->record->meta = [...$this->record->meta, 'config' => ['rules' => $this->rules, 'pricing_type' => $this->pricingType]];
+        $this->record->meta = [...$this->record->meta, 'config' => ['rules' => $this->rules, 'dynamic_pricing' => $this->dynamicPricing]];
         $this->record->save();
         //$this->notify('success', 'Customisations saved successfully.');
     }
