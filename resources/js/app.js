@@ -6,9 +6,9 @@ import Layout from './Layout/main.vue'
 createInertiaApp({
     resolve: (name) => {
         const pages = import.meta.glob("./Pages/**/*.vue", { eager: true });
-        //page.default.layout = page.default.layout || Layout;
-        console.log({name, pages});
-        return pages[`./Pages/${name}.vue`];
+        let page = pages[`./Pages/${name}.vue`]
+        page.default.layout = page.default.layout || Layout;
+        return page;
     },
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
