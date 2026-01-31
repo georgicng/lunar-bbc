@@ -31,9 +31,10 @@ class ProductService
     public function getProduct($id)
     {
         return Product::findOrFail($id)->with([
-            'images',
+            'media',
             'variants.basePrices.currency',
             'variants.basePrices.priceable',
+            'variants.values.option',
             'collections',
             'customisations',
         ])->first();
