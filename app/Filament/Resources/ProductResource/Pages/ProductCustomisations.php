@@ -43,18 +43,7 @@ class ProductCustomisations extends Page
     #[Computed]
     public function customisationAttributes()
     {
-        $productTypeId = $this->record?->product_type_id;
-
-        // If we have a product type, the attributes should be based off that.
-        if ($productTypeId) {
-            return  ProductType::find($productTypeId)->customisationAttributes->mapWithKeys(function (Attribute $attribute) {
-                return [
-                    $attribute->id => $attribute,
-                ];
-            });
-        }
-
-        return collect();
+        return $this->record->customisable_attributes;
     }
 
     #[Computed]
@@ -87,7 +76,7 @@ class ProductCustomisations extends Page
     #[Computed]
     public function config()
     {
-        return $this->record->meta['config'] ?? ['rules' => [], 'dynamic_pricing' => false];
+        return $this->record->config;
     }
 
     public function saveCustom()

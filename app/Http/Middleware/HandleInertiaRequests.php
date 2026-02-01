@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'cart' => \Lunar\Facades\CartSession::current() ?? ["lines" => [], "subtotal" => 0, "total" => 0, "discountTotal" => 0]
             //
         ];
     }

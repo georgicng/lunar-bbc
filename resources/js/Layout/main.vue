@@ -1,5 +1,10 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
+import { computed } from "vue";
+import { Link, usePage } from "@inertiajs/vue3";
+
+const page = usePage();
+const cart = computed(() => page.props.cart);
+console.log(cart);
 </script>
 
 <template>
@@ -113,7 +118,7 @@ import { Link } from "@inertiajs/vue3";
                     <button
                         class="absolute -top-2 -right-3 text-xs text-white bg-indigo-500 w-[18px] h-[18px] rounded-full"
                     >
-                        3
+                        {{ cart.lines.length }}
                     </button>
                 </div>
 
