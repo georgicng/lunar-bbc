@@ -4,7 +4,6 @@ import { Link, usePage } from "@inertiajs/vue3";
 
 const page = usePage();
 const cart = computed(() => page.props.cart);
-console.log(cart);
 </script>
 
 <template>

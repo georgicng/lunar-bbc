@@ -8,7 +8,7 @@ use Lunar\Base\DataTransferObjects\PaymentAuthorize;
 use Lunar\Events\PaymentAttemptEvent;
 use Lunar\Models\Contracts\Transaction;
 use Lunar\PaymentTypes\AbstractPayment;
-class Paystack extends AbstractPayment
+class BankTransfer extends AbstractPayment
 {
     /**
      * {@inheritDoc}

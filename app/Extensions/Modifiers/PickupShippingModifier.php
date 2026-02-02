@@ -6,7 +6,7 @@ use Lunar\Base\ShippingModifier;
 use Lunar\DataTypes\Price;
 use Lunar\DataTypes\ShippingOption;
 use Lunar\Facades\ShippingManifest;
-use Lunar\Models\Cart;
+use Lunar\Models\Contracts\Cart;
 use Lunar\Models\Currency;
 use Lunar\Models\TaxClass;
 
@@ -17,15 +17,6 @@ class PickupShippingModifier extends ShippingModifier
         // Get the tax class
         $taxClass = TaxClass::first();
 
-        ShippingManifest::addOption(
-            new ShippingOption(
-                name: 'Basic Delivery',
-                description: 'A basic delivery option',
-                identifier: 'BASDEL',
-                price: new Price(500, $cart->currency, 1),
-                taxClass: $taxClass
-            )
-        );
 
         ShippingManifest::addOption(
             new ShippingOption(
@@ -39,23 +30,6 @@ class PickupShippingModifier extends ShippingModifier
             )
         );
 
-        // Or add multiple options, it's your responsibility to ensure the identifiers are unique
-        ShippingManifest::addOptions(collect([
-            new ShippingOption(
-                name: 'Basic Delivery',
-                description: 'A basic delivery option',
-                identifier: 'BASDEL',
-                price: new Price(500, $cart->currency, 1),
-                taxClass: $taxClass
-            ),
-            new ShippingOption(
-                name: 'Express Delivery',
-                description: 'Express delivery option',
-                identifier: 'EXDEL',
-                price: new Price(1000, $cart->currency, 1),
-                taxClass: $taxClass
-            )
-        ]));
 
         return $next($cart);
     }

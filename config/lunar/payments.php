@@ -13,6 +13,10 @@ return [
             'driver' => 'paystack',
             'authorized' => 'processing',
         ],
+        'transfer' => [
+            'driver' => 'teller',
+            'authorized' => 'processing',
+        ],
     ],
 
 ];

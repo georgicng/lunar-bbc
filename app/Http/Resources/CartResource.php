@@ -29,19 +29,29 @@ class CartResource extends JsonResource
                     'unitPrice' => $line->unitPrice->formatted(),
                 ];
             }),
-            "shippingAddress" => $this->shippingAddress,
-            "billingAddress" => $this->billingAddress,
-            "total" => $this->total?->formatted(),
-            "subTotal" => $this->subTotal?->formatted(), // The cart sub total, excluding tax
-            "subTotalDiscounted" => $this->subTotalDiscounted?->formatted(), // The cart sub total, minus the discount amount.
-            "shippingTotal" => $this->shippingTotal?->formatted(), // The monetary value for the shipping total. (if applicable)
-            "taxTotal" => $this->taxTotal?->formatted(), // The monetary value for the amount of tax applied.
-            "taxBreakdown" => $this->taxBreakdown, // This is a collection of all taxes applied across all lines.
-            "discountTotal" => $this->discountTotal?->formatted(), // The monetary value for the discount total.
-            "discountBreakdown" => $this->discountBreakdown, // This is a collection of how discounts were calculated
-            "shippingSubTotal" => $this->shippingSubTotal?->formatted(), // The shipping total, excluding tax.
-            //"shippingTotal" => $this->shippingTotal, // The shipping total including tax.
-            "shippingBreakdown" =>  $this->shippingBreakdown, // This is a collection of the shipping breakdown for the cart.
+            "addresses" => [
+                "shippingAddress" => $this->shippingAddress,
+                "billingAddress" => $this->billingAddress
+            ],
+            "totals" => [
+                "total" => $this->total?->formatted(),
+                "subTotal" => $this->subTotal?->formatted(), // The cart sub total, excluding tax
+                "subTotalDiscounted" => $this->subTotalDiscounted?->formatted(), // The cart sub total, minus the discount amount.
+                "shippingTotal" => $this->shippingTotal?->formatted(), // The monetary value for the shipping total. (if applicable)
+                "taxTotal" => $this->taxTotal?->formatted(), // The monetary value for the amount of tax applied.
+                "taxBreakdown" => $this->taxBreakdown, // This is a collection of all taxes applied across all lines.
+                "discountTotal" => $this->discountTotal?->formatted(), // The monetary value for the discount total.
+                "discountBreakdown" => $this->discountBreakdown, // This is a collection of how discounts were calculated
+                "shippingSubTotal" => $this->shippingSubTotal?->formatted(), // The shipping total, excluding tax.
+                //"shippingTotal" => $this->shippingTotal, // The shipping total including tax.
+                "shippingBreakdown" =>  $this->shippingBreakdown, // This is a collection of the shipping breakdown for the cart.
+            ],
+            "shippingMethods" => \Lunar\Facades\ShippingManifest::getOptions(\Lunar\Facades\CartSession::current()),
+            "paymentMethods" =>  [
+                ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
+                ["id" => "paystack", "name" => "Pay with Card"],
+                ["id" => "bank-transfer", "name" => "Bank Transfer"]
+            ],
         ];
     }
 }

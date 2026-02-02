@@ -10,6 +10,7 @@ const props = defineProps({
 
 const showAddress = ref(false);
 const address = ref("");
+const showAddressForm = ref(false);
 const setAddress = () => {
     address.value = "123 Main St, Springfield, USA";
 };
@@ -132,7 +133,9 @@ const setAddress = () => {
                     Delivery Address
                 </p>
                 <div className="relative flex justify-between items-start mt-2">
-                    <p className="text-gray-500">No address found</p>
+                    <p className="text-gray-500">
+                        {{ cart.data.addresses?.billingAdress }}
+                    </p>
                     <button
                         @click="showAddress = !showAddress"
                         className="text-indigo-500 hover:underline cursor-pointer"
@@ -145,13 +148,14 @@ const setAddress = () => {
                         className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full"
                     >
                         <p
+                            v-for="address in cart.data.addresses"
                             className="text-gray-500 p-2
                             hover:bg-gray-100"
                         >
                             {{ address }}
                         </p>
                         <button
-                            @click="setAddress"
+                            @click="showAddressForm = !showAddressForm"
                             type="button"
                             className="text-indigo-500
                             text-center cursor-pointer p-2
@@ -163,14 +167,23 @@ const setAddress = () => {
                 </div>
 
                 <p className="text-sm font-medium uppercase mt-6">
+                    Shipping Method
+                </p>
+
+                <select
+                    className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
+                >
+                    <option v-for="method in cart.data.shippingMethods" :value="method.identifier">{{  method.name  }}</option>
+                </select>
+
+                <p className="text-sm font-medium uppercase mt-6">
                     Payment Method
                 </p>
 
                 <select
                     className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
                 >
-                    <option value="COD">Cash On Delivery</option>
-                    <option value="Online">Online Payment</option>
+                    <option  v-for="method in cart.data.paymentMethods" :value="method.id">{{  method.name  }}</option>
                 </select>
             </div>
 
@@ -178,7 +191,8 @@ const setAddress = () => {
 
             <div className="text-gray-500 mt-4 space-y-2">
                 <p className="flex justify-between">
-                    <span>Price</span><span>{{ cart.data.subTotal }}</span>
+                    <span>Price</span
+                    ><span>{{ cart.data.totals.subTotal }}</span>
                 </p>
                 <p className="flex justify-between">
                     <span>Shipping Fee</span
@@ -187,10 +201,12 @@ const setAddress = () => {
                     }}</span>
                 </p>
                 <p className="flex justify-between">
-                    <span>Tax (2%)</span><span>{{ cart.data.taxTotal }}</span>
+                    <span>Tax (2%)</span
+                    ><span>{{ cart.data.totals.taxTotal }}</span>
                 </p>
                 <p className="flex justify-between text-lg font-medium mt-3">
-                    <span>Total Amount:</span><span>{{ cart.data.total }}</span>
+                    <span>Total Amount:</span
+                    ><span>{{ cart.data.totals.total }}</span>
                 </p>
             </div>
 
@@ -200,5 +216,93 @@ const setAddress = () => {
                 Place Order
             </button>
         </div>
+
+        <form
+            v-if="showAddressForm"
+            class="bg-white text-gray-500 max-w-96 mx-4 md:p-6 p-4 text-left text-sm rounded-lg shadow-lg"
+        >
+            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">
+                Need Help? Contact Us
+            </h2>
+            <div class="grid grid-cols-2 gap-4 mb-5">
+                <div>
+                    <label class="block text-sm text-gray-500 mb-2"
+                        >First name</label
+                    >
+                    <input
+                        type="text"
+                        placeholder="David"
+                        class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-500 mb-2"
+                        >Last name</label
+                    >
+                    <input
+                        type="text"
+                        placeholder="Andrew"
+                        class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
+                    />
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm text-gray-500 mb-2">Email id</label>
+                <input
+                    type="email"
+                    placeholder="david@company.com"
+                    class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
+                />
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm text-gray-500 mb-2"
+                    >Phone number</label
+                >
+                <div
+                    class="flex border border-gray-300 rounded-lg overflow-hidden focus-within:border-indigo-500 transition-colors"
+                >
+                    <select
+                        class="px-3 py-3 text-sm outline-none cursor-pointer text-gray-500 bg-white border-r border-gray-300"
+                    >
+                        <option>US</option>
+                        <option>UK</option>
+                        <option>IN</option>
+                        <option>CA</option>
+                    </select>
+                    <input
+                        type="tel"
+                        placeholder="+1 342 123-456"
+                        class="flex-1 px-3 py-3 text-sm outline-none"
+                    />
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm text-gray-500 mb-2">Address</label>
+                <textarea
+                    rows="4"
+                    class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none resize-y focus:border-indigo-500 transition-colors"
+                ></textarea>
+            </div>
+            <div class="mb-5">
+                <label class="block text-sm text-gray-500 mb-2">City</label>
+                <select
+                    class="px-3 py-3 text-sm outline-none cursor-pointer text-gray-500 bg-white border-r border-gray-300"
+                >
+                    <option>US</option>
+                    <option>UK</option>
+                    <option>IN</option>
+                    <option>CA</option>
+                </select>
+            </div>
+            <button
+                type="submit"
+                class="w-full my-3 bg-indigo-500 hover:bg-indigo-600/90 active:scale-95 transition py-2.5 rounded text-white"
+            >
+                Save
+            </button>
+        </form>
     </div>
 </template>

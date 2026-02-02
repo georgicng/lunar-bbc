@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Extensions\Modifiers\CityShippingModifier;
 use App\Extensions\Modifiers\PickupShippingModifier;
 use App\Extensions\PaymentTypes\Paystack;
+use App\Extensions\PaymentTypes\BankTransfer;
 use Lunar\Facades\Payments;
 
 class AppServiceProvider extends ServiceProvider
@@ -79,6 +80,10 @@ class AppServiceProvider extends ServiceProvider
 
         Payments::extend('paystack', function ($app) {
             return $app->make(Paystack::class);
+        });
+
+        Payments::extend('teller', function ($app) {
+            return $app->make(BankTransfer::class);
         });
     }
 }
