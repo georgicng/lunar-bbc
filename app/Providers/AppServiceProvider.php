@@ -17,6 +17,8 @@ use App\Extensions\Modifiers\PickupShippingModifier;
 use App\Extensions\PaymentTypes\Paystack;
 use App\Extensions\PaymentTypes\BankTransfer;
 use Lunar\Facades\Payments;
+use Outerweb\FilamentSettings\Filament\Plugins\FilamentSettingsPlugin;
+use App\Filament\Resources;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,7 +31,22 @@ class AppServiceProvider extends ServiceProvider
             \Lunar\Admin\Filament\Resources\ProductResource::class => \App\Extensions\Resources\ProductResource::class,
             \Lunar\Admin\Filament\Resources\ProductTypeResource::class => \App\Extensions\Resources\ProductTypeResource::class,
         ]);
-        LunarPanel::register();
+        LunarPanel::panel(fn($panel) => $panel
+            ->resources([
+                // Register new Filament Resources
+                Resources\CityResource::class,
+                Resources\PickupCenterResource::class,
+                Resources\CityShippingResource::class
+            ])
+            ->plugins(
+                [
+                    FilamentSettingsPlugin::make()
+                        ->pages([
+                            // Add your settings pages here
+                        ]),
+                ]
+            ))
+            ->register();
     }
 
     /**
