@@ -39,4 +39,9 @@ class ProductService
             'customisations',
         ])->first();
     }
+
+    public function getVariant($id, $options = [])
+    {
+        return $this->getProduct($id)->variants->first();
+    }
 }

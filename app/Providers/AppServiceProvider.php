@@ -12,6 +12,10 @@ use Lunar\Models\ProductType;
 use App\Models\Product;
 use App\Models\ProductCustomisation;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Extensions\Modifiers\CityShippingModifier;
+use App\Extensions\Modifiers\PickupShippingModifier;
+use App\Extensions\PaymentTypes\Paystack;
+use Lunar\Facades\Payments;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot(\Lunar\Base\ShippingModifiers $shippingModifiers): void
     {
         //override morph map to include product_customisation
         //TODO: find better way to merge with existing morph map and confirm nothing breaks
@@ -63,6 +67,18 @@ class AppServiceProvider extends ServiceProvider
             return $productTypeModel->mappedAttributes()->whereAttributeType(
                 ProductCustomisation::morphName()
             );
+        });
+
+        $shippingModifiers->add(
+            CityShippingModifier::class
+        );
+
+        $shippingModifiers->add(
+            PickupShippingModifier::class
+        );
+
+        Payments::extend('paystack', function ($app) {
+            return $app->make(Paystack::class);
         });
     }
 }

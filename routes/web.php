@@ -6,6 +6,9 @@ use App\Services\OrderService;
 use Inertia\Inertia;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\CartResource;
+use Illuminate\Http\Request;
+use App\Http\Requests\CartPostRequest;
 
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -26,16 +29,45 @@ Route::get('/products/{id}', function (int $id, ProductService $service) {
         'product' => new ProductResource($service->getProduct($id)),
     ]);
 });
-Route::get('/cart', function () {
-    $service = new OrderService();
+Route::post('/product/{id}/add-to-cart',  function (OrderService $orderService, ProductService $productService, CartPostRequest $request, int $id) {
+    $orderService->addToCart(
+        $productService->getVariant($id),
+        $request->input('quantity'),
+        $request->input('meta', [])
+    );
+    return to_route('cart');
+});
+
+
+Route::put('/cart/current/lines/{id}',  function (OrderService $orderService, CartPostRequest $request, int $id) {
+    $orderService->updateCartItem(
+        $id,
+        $request->input('quantity'),
+        $request->input('meta', [])
+    );
+    return to_route('cart');
+});
+Route::put('/cart/current/address',  function (OrderService $orderService, Request $request) {
+    $orderService->setAddress(
+        $request->input('address', [])
+    );
+    return to_route('cart');
+});
+Route::put('/cart/current/shipping',  function (OrderService $orderService, Request $request) {
+    $orderService->setShipping(
+        $request->input('shipping', [])
+    );
+    return to_route('cart');
+});
+Route::put('/cart/current/payment/{method}',  function (OrderService $orderService, string $method) {
+    $orderService->fulfill(
+        $method
+    );
+    return to_route('cart');
+});
+Route::get('/cart', function (OrderService $service) {
     return Inertia::render('Cart', [
-        'cart' => $service->getCart(),
+        'cart' => new CartResource($service->getCart()),
     ]);
-});
-Route::get('/checkout', function () {
-    $service = new OrderService();
-    return Inertia::render('Checkout', [
-        'cart' => $service->getCart(),
-    ]);
-});
+})->name('cart');
 Route::inertia('/success', 'Success');

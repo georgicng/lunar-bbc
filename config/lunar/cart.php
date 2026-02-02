@@ -54,7 +54,7 @@ return [
         */
         'cart_lines' => [
             Lunar\Pipelines\CartLine\GetUnitPrice::class,
-            App\Pipelines\CartLine\GetIncrementPrice::class
+            //App\Pipelines\CartLine\GetIncrementPrice::class
         ],
     ],
 

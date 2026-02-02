@@ -9,6 +9,10 @@ return [
             'driver' => 'offline',
             'authorized' => 'payment-offline',
         ],
+        'card' => [
+            'driver' => 'paystack',
+            'authorized' => 'processing',
+        ],
     ],
 
 ];

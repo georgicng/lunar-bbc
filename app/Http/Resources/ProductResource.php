@@ -21,7 +21,7 @@ class ProductResource extends JsonResource
             "data" => $this->attribute_data,
             "collection" => $this->collections[0]->attribute_data,
             "images" => $this->images,
-            "price" => $this->variants[0]->prices[0]->price->value,
+            "price" => $this->variants[0]->prices[0]->price->decimal(rounding: true),
             "customisations" => $this->customisations->map(function ($item) {
                 $item->attribute = $this->customisable_attributes[$item->attribute_id];
                 return $item;

@@ -1,7 +1,6 @@
 <script setup>
-import {ref, computed} from "vue";
-import { Link } from "@inertiajs/vue3";
-import Multiselect from "vue-multiselect";
+import { ref, computed } from "vue";
+import { Link, router } from "@inertiajs/vue3";
 import {
     useField,
     configure,
@@ -27,6 +26,7 @@ const { getMarkup, getDynamicMarkup } = useDynamicPricing(
     props.product.customisations,
 );
 const model = ref({});
+const quantity = ref(1);
 
 const increment = computed(() => {
     if (props.product.dynamic_pricing) {
@@ -57,7 +57,15 @@ const getRules = ({ id, required, attribute, min, max }) => {
         .join("|");
 };
 
+const form = computed(() => ({
+    quantity: quantity.value,
+    id: props.product.id,
+    meta: { customisations: model.value },
+}));
 
+const submit = () => {
+    router.post(`/product/${props.product.id}/add-to-cart`, form.value);
+};
 </script>
 
 <template>
@@ -158,9 +166,11 @@ const getRules = ({ id, required, attribute, min, max }) => {
 
                 <div class="mt-6">
                     <p class="text-gray-500/70 line-through">
-                        MRP: {{ product.price }}
+                        NGN: {{ product.price }}
                     </p>
-            <p class="text-2xl font-medium">MRP: {{ increment }}</p>
+                    <p class="text-2xl font-medium">
+                        NGN: {{ parseFloat(product.price) + parseFloat(increment) }}
+                    </p>
                     <span class="text-gray-500/70"
                         >(inclusive of all taxes)</span
                     >
@@ -234,20 +244,35 @@ const getRules = ({ id, required, attribute, min, max }) => {
                             class="w-full h-[150px] mb-[15px] p-[20px] bg-transparent text-[14px] border-[1px] border-solid border-[#e9e9e9] rounded-[5px] text-[#777] outline-[0]"
                         />
                     </div>
-                </Form>
+                    <div class="pt-[20px]">
+                        <h3 class="mb-[15px] text-[20px] max-sm:text-[16px]">
+                            Qty
+                        </h3>
+                        <Field
+                            type="number"
+                            name="quantity"
+                            v-model="quantity"
+                            rules="required|min:1"
+                            class="w-full h-[50px] py-[5px] px-[20px] outline-[0] border-[1px] border-solid border-[#e9e9e9] rounded-[5px] twxt-[#777] text-[14px]"
+                        />
+                    </div>
 
-                <div class="flex items-center mt-10 gap-4 text-base">
-                    <button
-                        class="w-full py-3.5 font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition cursor-pointer"
-                    >
-                        Add to Cart
-                    </button>
-                    <button
-                        class="w-full py-3.5 font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition cursor-pointer"
-                    >
-                        Buy now
-                    </button>
-                </div>
+                    <div class="flex items-center mt-10 gap-4 text-base">
+                        <button
+                            class="w-full py-3.5 font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition cursor-pointer"
+                            type="button"
+                            @click="submit()"
+                        >
+                            Add to Cart
+                        </button>
+                        <button
+                            class="w-full py-3.5 font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition cursor-pointer"
+                            type="button"
+                        >
+                            Buy now
+                        </button>
+                    </div>
+                </Form>
             </div>
         </div>
 
