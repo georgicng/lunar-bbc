@@ -88,11 +88,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $shippingModifiers->add(
-            CityShippingModifier::class
+            PickupShippingModifier::class
         );
 
         $shippingModifiers->add(
-            PickupShippingModifier::class
+            CityShippingModifier::class
         );
 
         Payments::extend('paystack', function ($app) {

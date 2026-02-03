@@ -41,6 +41,8 @@ class OrderService
         'state' => null,
         'postcode' => null,
         'country_id' => null,
+        'contact_email' => null,
+        'contact_phone' => null,
     ]): void
     {
 
@@ -49,9 +51,10 @@ class OrderService
         $cart->setBillingAddress($address);
     }
 
-    public function setShipping(\Lunar\DataTypes\ShippingOption $option): void
+    public function setShipping(string $id): void
     {
         $cart = $this->getCart();
+        $option = \Lunar\Facades\ShippingManifest::getOption($cart, $id);
         $cart->setShippingOption($option);
     }
 

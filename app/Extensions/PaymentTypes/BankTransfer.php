@@ -2,12 +2,12 @@
 
 namespace App\Extensions\PaymentTypes;
 
+use Lunar\Base\DataTransferObjects\PaymentAuthorize;
 use Lunar\Base\DataTransferObjects\PaymentCapture;
 use Lunar\Base\DataTransferObjects\PaymentRefund;
-use Lunar\Base\DataTransferObjects\PaymentAuthorize;
 use Lunar\Events\PaymentAttemptEvent;
-use Lunar\Models\Contracts\Transaction;
-use Lunar\PaymentTypes\AbstractPayment;
+use Lunar\Models\Contracts\Transaction as TransactionContract;
+
 class BankTransfer extends AbstractPayment
 {
     /**
@@ -15,19 +15,28 @@ class BankTransfer extends AbstractPayment
      */
     public function authorize(): ?PaymentAuthorize
     {
-        if (!$this->order) {
-            if (!$this->order = $this->cart->order) {
+        if (! $this->order) {
+            if (! $this->order = $this->cart->draftOrder()->first()) {
                 $this->order = $this->cart->createOrder();
             }
         }
+        $orderMeta = array_merge(
+            (array) $this->order->meta,
+            $this->data['meta'] ?? []
+        );
 
-        // ...
+        $status = $this->data['authorized'] ?? null;
+
+        $this->order->update([
+            'status' => $status ?? ($this->config['authorized'] ?? null),
+            'meta' => $orderMeta,
+            'placed_at' => now(),
+        ]);
 
         $response = new PaymentAuthorize(
             success: true,
-            message: 'The payment was successful',
             orderId: $this->order->id,
-            paymentType: 'custom-type'
+            paymentType: 'teller',
         );
 
         PaymentAttemptEvent::dispatch($response);
@@ -38,18 +47,16 @@ class BankTransfer extends AbstractPayment
     /**
      * {@inheritDoc}
      */
-    public function refund(Transaction $transaction, int $amount = 0, $notes = null): PaymentRefund
+    public function refund(TransactionContract $transaction, int $amount = 0, $notes = null): PaymentRefund
     {
-        // ...
         return new PaymentRefund(true);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function capture(Transaction $transaction, $amount = 0): PaymentCapture
+    public function capture(TransactionContract $transaction, $amount = 0): PaymentCapture
     {
-        // ...
         return new PaymentCapture(true);
     }
 }

@@ -1,6 +1,9 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { Link, router } from "@inertiajs/vue3";
+import { ref, computed, watch } from "vue";
+import { mapToId } from "../lib";
+import Modal from "@/components/Modal.vue";
+
 const props = defineProps({
     cart: {
         type: Object,
@@ -9,11 +12,56 @@ const props = defineProps({
 });
 console.log(props.cart);
 const showAddress = ref(false);
-const address = ref("");
+const contact = ref(
+    props.cart.data.addresses?.billingAddress ?? {
+        country_id: null,
+        first_name: "",
+        last_name: null,
+        company_name: null,
+        line_one: "",
+        city: "",
+        state: null,
+        postcode: "",
+        contact_email: null,
+        contact_phone: null,
+    },
+);
 const showAddressForm = ref(false);
-const setAddress = () => {
-    address.value = "123 Main St, Springfield, USA";
+const address = computed(() => {
+    if (!props.cart.data.addresses?.billingAddress) {
+        return "No address added yet";
+    }
+    return `${contact.value.line_one}, ${contact.value.city}`;
+});
+const cityMap = computed(() => {
+    if (!props.cart.data.meta?.cities) {
+        return {};
+    }
+    return mapToId(props.cart.data.meta.cities, "name");
+});
+const setAddress = async () => {
+    await router.post("/cart/current/address", {
+        address: {
+            ...contact.value,
+            country_id: cityMap.value[contact.value.city].country_id,
+            state: cityMap.value[contact.value.city].state_id,
+        },
+    });
+    showAddressForm.value = false;
 };
+const shippingMethod = ref(props.cart.data.shipping);
+watch(shippingMethod, async (val) => {
+    console.log("shipping", val);
+    await router.put("/cart/current/shipping", {
+        shipping: val,
+    });
+});
+const paymentMethod = ref("");
+watch(paymentMethod, async (val) => {
+    await router.put("/cart/current/payment", {
+        payment: val,
+    });
+});
 </script>
 
 <template>
@@ -134,13 +182,17 @@ const setAddress = () => {
                 </p>
                 <div className="relative flex justify-between items-start mt-2">
                     <p className="text-gray-500">
-                        {{ cart.data.addresses?.billingAdress }}
+                        {{ address }}
                     </p>
                     <button
-                        @click="showAddress = !showAddress"
+                        @click="showAddressForm = true"
                         className="text-indigo-500 hover:underline cursor-pointer"
                     >
-                        Change
+                        {{
+                            cart.data.addresses?.billingAddress
+                                ? "Change"
+                                : "Add"
+                        }}
                     </button>
 
                     <div
@@ -155,7 +207,7 @@ const setAddress = () => {
                             {{ address }}
                         </p>
                         <button
-                            @click="showAddressForm = !showAddressForm"
+                            @click="showAddressForm = true"
                             type="button"
                             className="text-indigo-500
                             text-center cursor-pointer p-2
@@ -171,9 +223,16 @@ const setAddress = () => {
                 </p>
 
                 <select
+                    v-model="shippingMethod"
                     className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
                 >
-                    <option v-for="method in cart.data.shippingMethods" :value="method.identifier">{{  method.name  }}</option>
+                    <option value="">select shipping</option>
+                    <option
+                        v-for="method in cart.data.shippingMethods"
+                        :value="method.identifier"
+                    >
+                        {{ method.name }}
+                    </option>
                 </select>
 
                 <p className="text-sm font-medium uppercase mt-6">
@@ -181,9 +240,16 @@ const setAddress = () => {
                 </p>
 
                 <select
+                    v-model="paymentMethod"
                     className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
                 >
-                    <option  v-for="method in cart.data.paymentMethods" :value="method.id">{{  method.name  }}</option>
+                    <option value="">select payment mode</option>
+                    <option
+                        v-for="method in cart.data.paymentMethods"
+                        :value="method.id"
+                    >
+                        {{ method.name }}
+                    </option>
                 </select>
             </div>
 
@@ -197,7 +263,7 @@ const setAddress = () => {
                 <p className="flex justify-between">
                     <span>Shipping Fee</span
                     ><span className="text-green-600">{{
-                        cart.data.shippingTotal
+                        cart.data.totals.shippingTotal
                     }}</span>
                 </p>
                 <p className="flex justify-between">
@@ -216,93 +282,100 @@ const setAddress = () => {
                 Place Order
             </button>
         </div>
-
-        <form
-            v-if="showAddressForm"
-            class="bg-white text-gray-500 max-w-96 mx-4 md:p-6 p-4 text-left text-sm rounded-lg shadow-lg"
+        <Modal
+            title="Address Modal"
+            :show="showAddressForm"
+            @close="showAddressForm = false"
         >
-            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">
-                Need Help? Contact Us
-            </h2>
-            <div class="grid grid-cols-2 gap-4 mb-5">
-                <div>
+            <form
+                class="bg-white text-gray-500 max-w-96 mx-4 md:p-6 p-4 text-left text-sm rounded-lg shadow-lg"
+            >
+                <div class="grid grid-cols-2 gap-4 mb-5">
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-2"
+                            >First name</label
+                        >
+                        <input
+                            type="text"
+                            v-model="contact.first_name"
+                            placeholder="David"
+                            class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-2"
+                            >Last name</label
+                        >
+                        <input
+                            type="text"
+                            v-model="contact.last_name"
+                            placeholder="Andrew"
+                            class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
+                        />
+                    </div>
+                </div>
+
+                <div class="mb-5">
                     <label class="block text-sm text-gray-500 mb-2"
-                        >First name</label
+                        >Email id</label
                     >
                     <input
-                        type="text"
-                        placeholder="David"
+                        type="email"
+                        v-model="contact.contact_email"
+                        placeholder="david@company.com"
                         class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
                     />
                 </div>
-                <div>
+
+                <div class="mb-5">
                     <label class="block text-sm text-gray-500 mb-2"
-                        >Last name</label
+                        >Phone number</label
                     >
-                    <input
-                        type="text"
-                        placeholder="Andrew"
-                        class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
-                    />
+                    <div
+                        class="flex border border-gray-300 rounded-lg overflow-hidden focus-within:border-indigo-500 transition-colors"
+                    >
+                        <input
+                            type="tel"
+                            v-model="contact.contact_phone"
+                            placeholder="+1 342 123-456"
+                            class="flex-1 px-3 py-3 text-sm outline-none"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <div class="mb-5">
-                <label class="block text-sm text-gray-500 mb-2">Email id</label>
-                <input
-                    type="email"
-                    placeholder="david@company.com"
-                    class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500 transition-colors"
-                />
-            </div>
-
-            <div class="mb-5">
-                <label class="block text-sm text-gray-500 mb-2"
-                    >Phone number</label
-                >
-                <div
-                    class="flex border border-gray-300 rounded-lg overflow-hidden focus-within:border-indigo-500 transition-colors"
-                >
+                <div class="mb-5">
+                    <label class="block text-sm text-gray-500 mb-2"
+                        >Address</label
+                    >
+                    <textarea
+                        rows="4"
+                        v-model="contact.line_one"
+                        class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none resize-y focus:border-indigo-500 transition-colors"
+                    ></textarea>
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm text-gray-500 mb-2">City</label>
                     <select
+                        v-model="contact.city"
                         class="px-3 py-3 text-sm outline-none cursor-pointer text-gray-500 bg-white border-r border-gray-300"
                     >
-                        <option>US</option>
-                        <option>UK</option>
-                        <option>IN</option>
-                        <option>CA</option>
+                        <option value="">Select city</option>
+                        <option
+                            v-for="city in cart.data.meta.cities"
+                            :value="city.name"
+                        >
+                            {{ city.name }}
+                        </option>
                     </select>
-                    <input
-                        type="tel"
-                        placeholder="+1 342 123-456"
-                        class="flex-1 px-3 py-3 text-sm outline-none"
-                    />
                 </div>
-            </div>
-
-            <div class="mb-5">
-                <label class="block text-sm text-gray-500 mb-2">Address</label>
-                <textarea
-                    rows="4"
-                    class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm outline-none resize-y focus:border-indigo-500 transition-colors"
-                ></textarea>
-            </div>
-            <div class="mb-5">
-                <label class="block text-sm text-gray-500 mb-2">City</label>
-                <select
-                    class="px-3 py-3 text-sm outline-none cursor-pointer text-gray-500 bg-white border-r border-gray-300"
+                <button
+                    @click="setAddress"
+                    type="button"
+                    class="w-full my-3 bg-indigo-500 hover:bg-indigo-600/90 active:scale-95 transition py-2.5 rounded text-white"
                 >
-                    <option>US</option>
-                    <option>UK</option>
-                    <option>IN</option>
-                    <option>CA</option>
-                </select>
-            </div>
-            <button
-                type="submit"
-                class="w-full my-3 bg-indigo-500 hover:bg-indigo-600/90 active:scale-95 transition py-2.5 rounded text-white"
-            >
-                Save
-            </button>
-        </form>
+                    Save
+                </button>
+            </form>
+        </Modal>
     </div>
 </template>

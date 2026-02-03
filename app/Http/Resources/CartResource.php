@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\City;
 
 class CartResource extends JsonResource
 {
@@ -54,6 +55,11 @@ class CartResource extends JsonResource
                 ["id" => "paystack", "name" => "Pay with Card"],
                 ["id" => "bank-transfer", "name" => "Bank Transfer"]
             ],
+            "meta" => [
+                "cities" => City::get()
+            ],
+            "shipping" => $this->getShippingOption()?->identifier
+
         ];
     }
 }

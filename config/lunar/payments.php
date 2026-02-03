@@ -7,11 +7,11 @@ return [
     'types' => [
         'cash-in-hand' => [
             'driver' => 'offline',
-            'authorized' => 'payment-offline',
+            'authorized' => 'pending',
         ],
         'card' => [
             'driver' => 'paystack',
-            'authorized' => 'processing',
+            'authorized' => 'pending',
         ],
         'transfer' => [
             'driver' => 'teller',

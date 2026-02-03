@@ -9,6 +9,7 @@ use App\Http\Resources\ProductResource;
 use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
 use App\Http\Requests\CartPostRequest;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -47,7 +48,7 @@ Route::put('/cart/current/lines/{id}',  function (OrderService $orderService, Ca
     );
     return to_route('cart');
 });
-Route::put('/cart/current/address',  function (OrderService $orderService, Request $request) {
+Route::post('/cart/current/address',  function (OrderService $orderService, Request $request) {
     $orderService->setAddress(
         $request->input('address', [])
     );
@@ -55,7 +56,7 @@ Route::put('/cart/current/address',  function (OrderService $orderService, Reque
 });
 Route::put('/cart/current/shipping',  function (OrderService $orderService, Request $request) {
     $orderService->setShipping(
-        $request->input('shipping', [])
+        $request->input('shipping')
     );
     return to_route('cart');
 });
@@ -71,3 +72,5 @@ Route::get('/cart', function (OrderService $service) {
     ]);
 })->name('cart');
 Route::inertia('/success', 'Success');
+
+
