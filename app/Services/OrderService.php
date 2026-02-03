@@ -19,7 +19,7 @@ class OrderService
             throw new \Exception('Not enough stock!');
         }
 
-        CartSession::manager()->add($purchasable, $quantity, $meta);
+        CartSession::add($purchasable, $quantity, $meta)->calculate();
     }
 
     public function updateCartItem($id, $quantity, $meta = []): void
@@ -28,7 +28,7 @@ class OrderService
         if ($line->purchasable->stock < $quantity) {
             throw new \Exception('Not enough stock!');
         }
-        CartSession::updateLine($id, $quantity, $meta);
+        CartSession::updateLine($id, $quantity, $meta)->calculate();
     }
 
     public function setAddress(array $address = [

@@ -9,6 +9,7 @@ use Lunar\Models\CartLine;
 use Lunar\Models\Contracts\CartLine as CartLineContract;
 use Spatie\LaravelBlink\BlinkFacade as Blink;
 use App\Lib\RuleEvaluator;
+use Illuminate\Support\Arr;
 
 class GetIncrementPrice
 {
@@ -22,32 +23,11 @@ class GetIncrementPrice
         /** @var CartLine $cart */
         $purchasable = $cartLine->purchasable;
         $cart = $cartLine->cart;
-
-        if ($customer = $cart->customer) {
-            $customerGroups = $customer->customerGroups;
-        } else {
-            $customerGroups = $cart->user?->customers->pluck('customerGroups')->flatten();
-        }
-
-        $currency = Blink::once('currency_' . $cart->currency_id, function () use ($cart) {
-            return $cart->currency;
-        });
-
-        $priceResponse = Pricing::currency($currency)
-            ->qty($cartLine->quantity)
-            ->currency($cart->currency)
-            ->customerGroups($customerGroups)
-            ->for($purchasable)
-            ->get();
+        $increment = $this->getPriceIncrement($purchasable->product, $cartLine->meta['customisations']);
+        //logger()->info(json_encode(['increment' => $increment, 'unit' => $cartLine->unitPrice->value]));
 
         $cartLine->unitPrice = new Price(
-            $priceResponse->matched->price->value,
-            $cart->currency,
-            $purchasable->getUnitQuantity()
-        );
-
-        $cartLine->unitPriceInclTax = new Price(
-            $priceResponse->matched->priceIncTax()->value,
+            $cartLine->unitPrice->value + ($increment * 100), //TODO: find a better way to do this
             $cart->currency,
             $purchasable->getUnitQuantity()
         );
@@ -61,13 +41,20 @@ class GetIncrementPrice
      * @param  int  $qty
      * @return float
      */
-    protected function getPriceIncrement($purchasable, $context)
+    protected function getPriceIncrement($product, $context)
     {
-        $product = $purchasable->product;
+        $total = 0;
         $customisations = $product->customisations->map(function ($item) use ($product) {
             $item->attribute = $product->customisable_attributes[$item->attribute_id];
             return $item;
         });
+
+
+        foreach ($customisations as $customisation) {
+            $value = $context[$customisation->attribute_id] ?? null;
+            $total += $this->getOptionIncrement($value, $customisation);
+        }
+        return $total;
     }
 
     protected function getOptionIncrement($value, $option)
@@ -79,14 +66,16 @@ class GetIncrementPrice
             $value = [$value];
         }
         return array_reduce($value, function ($acc, $_value) use ($option) {
-            if (!is_array($option['attribute_data'])) {
-                return $acc + ($option['attribute_data']['prefix'] === "+" ? $option['attribute_data']['price'] : -$option['attribute_data']['price']);
+            if (Arr::isAssoc($option['attribute_data'])) {
+                $prefix = $option['attribute_data']['prefix'] ?? "+";
+                $price = $option['attribute_data']['price'];
+                return $acc + intval($prefix === "+" ? $price : -$price);
             }
-            $selection = array_find($option['attribute_data'], fn($val) => $val['id'] === $_value);
+            $selection = collect($option['attribute_data'])->first(fn($val) => $val['id'] === $_value);
             if (!$selection) {
                 return $acc;
             }
-            return $acc + ($selection['attribute_data']['prefix'] === "+" ? $selection['attribute_data']['price'] : -$selection['attribute_data']['price']);
+            return $acc + intval($selection['prefix'] === "+" ? $selection['price'] : -$selection['price']);
         }, 0);
     }
 }

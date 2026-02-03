@@ -7,7 +7,7 @@ const props = defineProps({
         required: true,
     },
 });
-
+console.log(props.cart);
 const showAddress = ref(false);
 const address = ref("");
 const showAddressForm = ref(false);
@@ -58,7 +58,7 @@ const setAddress = () => {
                         </p>
                         <div className="font-normal text-gray-500/70">
                             <p>
-                                Size: <span>{{ product.size || "N/A" }}</span>
+                                <span>{{ product.option || "N/A" }}</span>
                             </p>
                             <div className="flex items-center">
                                 <p>Qty:</p>

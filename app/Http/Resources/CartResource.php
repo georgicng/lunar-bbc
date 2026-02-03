@@ -14,20 +14,21 @@ class CartResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $cart = $this->calculate();
         return [
             "id" => $this->id,
-            "lines" => $this->lines->map(function ($line) {
+            "lines" => $cart->lines->map(function ($line) {
                 return [
                     'id' => $line->id,
                     'identifier' => $line->purchasable->getIdentifier(),
                     'quantity' => $line->quantity,
-                    'name' => $line->purchasable->getName(),
-                    'description' => $line->purchasable->getDescription(),
+                    'name' => $line->purchasable->getDescription(),
                     'image' => $line->purchasable->product->getMedia('images')->first()?->getUrl(),
                     'option' => $line->purchasable->getOption(),
                     'options' => $line->purchasable->getOptions()->implode(' / '),
                     'subTotal' => $line->subTotal->formatted(),
                     'unitPrice' => $line->unitPrice->formatted(),
+                    "line" => $line
                 ];
             }),
             "addresses" => [
