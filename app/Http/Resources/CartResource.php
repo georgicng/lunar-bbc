@@ -53,7 +53,7 @@ class CartResource extends JsonResource
             "paymentMethods" =>  [
                 ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
                 ["id" => "paystack", "name" => "Pay with Card"],
-                ["id" => "bank-transfer", "name" => "Bank Transfer"]
+                ["id" => "teller", "name" => "Bank Transfer"]
             ],
             "meta" => [
                 "cities" => City::get()

@@ -57,11 +57,9 @@ watch(shippingMethod, async (val) => {
     });
 });
 const paymentMethod = ref("");
-watch(paymentMethod, async (val) => {
-    await router.put("/cart/current/payment", {
-        payment: val,
-    });
-});
+const submit = async () => {
+    await router.get(`/checkout/${paymentMethod.value}`);
+}
 </script>
 
 <template>
@@ -277,6 +275,8 @@ watch(paymentMethod, async (val) => {
             </div>
 
             <button
+            @click="submit"
+            :disabled="paymentMethod != 'teller' || !shippingMethod || !cart.data.addresses?.billingAddress"
                 className="w-full py-3 mt-6 cursor-pointer bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition"
             >
                 Place Order
@@ -338,6 +338,22 @@ watch(paymentMethod, async (val) => {
                             type="tel"
                             v-model="contact.contact_phone"
                             placeholder="+1 342 123-456"
+                            class="flex-1 px-3 py-3 text-sm outline-none"
+                        />
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm text-gray-500 mb-2"
+                        >Post codee</label
+                    >
+                    <div
+                        class="flex border border-gray-300 rounded-lg overflow-hidden focus-within:border-indigo-500 transition-colors"
+                    >
+                        <input
+                            type="text"
+                            v-model="contact.postcode"
+                            placeholder="123456"
                             class="flex-1 px-3 py-3 text-sm outline-none"
                         />
                     </div>

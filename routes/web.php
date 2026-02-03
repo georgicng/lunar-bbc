@@ -60,17 +60,25 @@ Route::put('/cart/current/shipping',  function (OrderService $orderService, Requ
     );
     return to_route('cart');
 });
-Route::put('/cart/current/payment/{method}',  function (OrderService $orderService, string $method) {
-    $orderService->fulfill(
-        $method
-    );
-    return to_route('cart');
-});
+
 Route::get('/cart', function (OrderService $service) {
     return Inertia::render('Cart', [
         'cart' => new CartResource($service->getCart()),
     ]);
 })->name('cart');
-Route::inertia('/success', 'Success');
+
+Route::get('/checkout/{method}',  function (OrderService $orderService, string $method) {
+    $orderService->fulfill(
+        $method
+    );
+    return to_route('success');
+});
+Route::inertia('/success', 'Success')->name('success');
 
 
+Route::controller(PaymentController::class)->prefix('paystack')->group(function () {
+        Route::get('/redirect', 'redirect')->name('paystack.redirect');
+        Route::get('/success', 'success')->name('paystack.success');
+        Route::get('/cancel', 'cancel')->name('paystack.cancel');
+        Route::get('/pay', 'popup')->name('paystack.popup');
+    });

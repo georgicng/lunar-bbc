@@ -7,6 +7,7 @@ use Lunar\Base\DataTransferObjects\PaymentCapture;
 use Lunar\Base\DataTransferObjects\PaymentRefund;
 use Lunar\Events\PaymentAttemptEvent;
 use Lunar\Models\Contracts\Transaction as TransactionContract;
+use Lunar\PaymentTypes\AbstractPayment;
 
 class BankTransfer extends AbstractPayment
 {

@@ -60,12 +60,10 @@ class OrderService
 
     public function fulfill($driver)
     {
-        $token = "test_card_token_visa_4242";
-        $driver = \Lunar\Facades\Payments::driver($driver);
-        $driver->cart($this->getCart());
-        $driver->withData([
-            'payment_token' => $token,
-        ]);
-        $driver->authorize();
+        if ($driver === 'teller') {
+            $driver = \Lunar\Facades\Payments::driver($driver);
+            $driver->cart($this->getCart());
+            $driver->authorize();
+        }
     }
 }
