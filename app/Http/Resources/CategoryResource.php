@@ -17,12 +17,10 @@ class CategoryResource extends JsonResource
         return [
             "id" => $this->id,
             "data" => $this->attribute_data,
-            "media" => [
-                "id" => $this->media->id,
-                "link" => $this->media->getUrl(),
-                "meta" => $this->media->custom_properties
-
-            ]
+            "images" => $this->getMedia('images')->map(function ($image) {
+                return [ 'url' => $image->getUrl(), 'altText' => $image->name ];
+            }),
+            "products" => ProductResource::collection($this->products),
         ];
     }
 }

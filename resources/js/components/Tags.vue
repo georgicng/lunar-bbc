@@ -81,7 +81,7 @@ const isActive = (option) => {
                     v-for="option in options"
                     :key="option.id"
                     class="transition-all duration-[0.3s] ease-in-out m-[2px] py-[5px] px-[10px] font-Poppins text-[14px] leading-[1] bg-[#fff] text-[#777] border-[1px] border-solid border-[#e9e9e9] rounded-[5px] cursor-pointer max-[1199px]:mr-[5px]"
-                    :class="isActive(option) ? 'active-color' : ''"
+                    :class="isActive(option) ? 'bg-blue-200' : ''"
                     :role="multiple ? 'checkbox' : 'radio'"
                     @click="select(option)"
                     v-text="option.name"

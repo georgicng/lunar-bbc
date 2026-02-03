@@ -1,11 +1,12 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
-defineProps({
+const props = defineProps({
     products: {
         type: Object,
         required: true,
     },
 });
+console.log(props)
 </script>
 
 <template>
@@ -27,8 +28,8 @@ defineProps({
             >
                 <img
                     class="rounded-lg w-full group-hover:shadow-xl hover:-translate-y-0.5 duration-300 transition-all h-72 object-cover object-top"
-                    src="https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop"
-                    alt="image"
+                    :src="product.images[0]?.url ?? '//placehold.co/400'"
+                    :alt="product.images[0]?.name ?? product.data.name.en + 'image'"
                 />
                 <p class="text-sm mt-2">{{ product.data.name.en }}</p>
                 <p class="text-xl">$ {{ product.price }}</p>

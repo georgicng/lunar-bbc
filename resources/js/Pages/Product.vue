@@ -27,6 +27,7 @@ const { getMarkup, getDynamicMarkup } = useDynamicPricing(
 );
 const model = ref({});
 const quantity = ref(1);
+const image = ref(props.product.images[0] || null);
 
 const increment = computed(() => {
     if (props.product.dynamic_pricing) {
@@ -79,10 +80,11 @@ const submit = () => {
             <div class="flex gap-3">
                 <div class="flex flex-col gap-3">
                     <div
-                        v-for="image in product.images"
+                        v-for="_image in product.images"
                         class="border max-w-24 border-gray-500/30 rounded overflow-hidden cursor-pointer"
+                        @click="image = _image"
                     >
-                        <img :src="image.small" alt="Thumbnail 1" />
+                        <img :src="_image.url" :alt="_image.name" />
                     </div>
                 </div>
 
@@ -90,8 +92,8 @@ const submit = () => {
                     class="border border-gray-500/30 max-w-100 rounded overflow-hidden"
                 >
                     <img
-                        :src="product.images[0]?.large"
-                        alt="Selected product"
+                        :src="image.url"
+                        :alt="image.name"
                     />
                 </div>
             </div>

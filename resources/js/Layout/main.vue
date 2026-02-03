@@ -52,8 +52,8 @@ const cart = computed(() => page.props.cart);
                 class="hidden absolute top-[60px] left-0 w-full bg-white shadow-md py-4 flex-col items-start gap-2 px-5 text-sm md:hidden"
             >
                 <Link class="block" href="/">Home</Link>
-                <Link class="block" href="/products">All Products</Link>
                 <Link class="block" href="/categories">All Categories</Link>
+                <Link class="block" href="/products">All Products</Link>
                 <button
                     class="cursor-pointer px-6 py-2 mt-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full text-sm"
                 >
@@ -63,8 +63,8 @@ const cart = computed(() => page.props.cart);
 
             <div class="hidden sm:flex items-center gap-8">
                 <Link href="/">Home</Link>
-                <Link href="/products">All Products</Link>
                 <Link href="/categories">All Categories</Link>
+                <Link href="/products">All Products</Link>
 
                 <div
                     class="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full"

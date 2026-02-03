@@ -9,17 +9,18 @@ class ProductService
 {
     public function getCategories()
     {
-        return Collection::all()->map(function ($item) {
-            //$item->media = $item->getMedia('images');
-            $item->media = $item->getMedia('images')[0];
-            return $item;
-        });
+        return Collection::with([
+            'thumbnail',
+                'products.variants.basePrices',
+                'products.defaultUrl',
+        ])->get();
     }
 
     public function getProducts($id)
     {
         return Product::when($id, fn ($query) => $query->with('collections')->where('id', $id))->with([
             'images',
+            'thumbnail',
             'variants.basePrices',
             'collections',
         ])->get();
