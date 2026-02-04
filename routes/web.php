@@ -15,7 +15,23 @@ use Lunar\Models\Order;
 use Lunar\Models\Transaction;
 
 Route::get('/', function () {
-    return Inertia::render('Home');
+    return Inertia::render('Home',  [
+        'blocks' => [
+            [
+                "id" => 1,
+                "handle" => 'newArrivals',
+                "title" => "New Arrivals",
+                "subtitle" => "Explore the latest additions to our collection.",
+                "sortOrder" =>  1,
+                "products" => [
+                    ['id' => 1, 'name' => "White crew-Neck T-Shirt", "price" => "29.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
+                    ['id' => 2, 'name' => "White crew-Neck T-Shirt", "price" => "39.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
+                    ['id' => 3, 'name' => "White crew-Neck T-Shirt", "price" => "29.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
+                    ['id' => 4, 'name' => "White crew-Neck T-Shirt", "price" => "49.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
+                ]
+            ]
+        ]
+    ]);
 });
 
 Route::get('/categories', function (ProductService $service) {
