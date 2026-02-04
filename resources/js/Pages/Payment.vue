@@ -74,9 +74,9 @@ const reference = () => {
             <button type="submit">Proceed to Pay</button>
         </form>
         <paystack v-if="paymentMethod == 'card'"
-            :amount="transaction.amount"
-            :email="order.email"
-            :paystackkey="meta.publicKey"
+            :amount="transaction.amount.value"
+            :email="transaction.meta.billingAddress.email"
+            :paystackkey="meta.public"
             :reference="transaction.reference"
             :callback="processPayment"
             :close="close"

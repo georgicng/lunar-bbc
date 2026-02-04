@@ -17,11 +17,16 @@ class Paystack extends AbstractPayment
      */
     public function authorize(): ?PaymentAuthorize
     {
+        $address = $this->cart->billingAddress;
         if (!$this->order) {
             if (!$this->order = $this->cart->order) {
                 $this->order = $this->cart->createOrder();
             }
         }
+        $orderMeta = array_merge(
+            (array) $this->order->meta,
+            $this->data['meta'] ?? [],
+        );
 
         $status = $this->data['authorized'] ?? null;
 
@@ -37,7 +42,9 @@ class Paystack extends AbstractPayment
             'status' => 'success',
             'driver' => 'paystack',
             'success' => true,
-            'reference' => $this->order->reference,
+            'reference' => Lib\TransRef::getHashedToken(),
+            'card_type' => 'na',
+            'meta' => [ 'billingAddress' => $address]
         ]);
 
         $response = new PaymentAuthorize(
@@ -69,6 +76,7 @@ class Paystack extends AbstractPayment
             'driver' => 'paystack',
             'success' => true,
             'reference' => $transaction->reference,
+            'card_type' => 'na'
         ]);
         return new PaymentRefund(true);
     }
@@ -91,6 +99,7 @@ class Paystack extends AbstractPayment
                 'driver' => 'paystack',
                 'success' => true,
                 'reference' => $transaction->reference,
+                'card_type' => 'na'
             ]);
             return new PaymentCapture(true);
         }
@@ -100,5 +109,9 @@ class Paystack extends AbstractPayment
     {
         $model = new Lib\Paystack($this->data['url'], $this->data['secret']);
         return $model->isValid($reference);
+    }
+
+    public function getData() {
+        return $this->data ?? [];
     }
 }

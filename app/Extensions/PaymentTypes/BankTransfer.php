@@ -16,6 +16,7 @@ class BankTransfer extends AbstractPayment
      */
     public function authorize(): ?PaymentAuthorize
     {
+        $address = $this->cart->billingAddress;
         if (! $this->order) {
             if (! $this->order = $this->cart->draftOrder()->first()) {
                 $this->order = $this->cart->createOrder();
@@ -41,6 +42,8 @@ class BankTransfer extends AbstractPayment
             'driver' => 'bank-transfer',
             'success' => true,
             'reference' => $this->order->reference,
+            'card_type' => 'na',
+            'meta' => [ 'billingAddress' => $address]
         ]);
 
         $response = new PaymentAuthorize(
@@ -71,6 +74,7 @@ class BankTransfer extends AbstractPayment
             'driver' => 'bank-transfer',
             'success' => true,
             'reference' => $transaction->reference,
+            'card_type' => 'na'
         ]);
         return new PaymentRefund(true);
     }
@@ -92,7 +96,12 @@ class BankTransfer extends AbstractPayment
             'driver' => 'bank-transfer',
             'success' => true,
             'reference' => $transaction->reference,
+            'card_type' => 'na'
         ]);
         return new PaymentCapture(true);
+    }
+
+    public function getData() {
+        return $this->data;
     }
 }

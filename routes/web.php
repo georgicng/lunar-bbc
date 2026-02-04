@@ -76,9 +76,9 @@ Route::get('/checkout/{method}',  function (OrderService $orderService, string $
     );
     $order = Order::find($authorization->orderId);
     return Inertia::render('Payment', [
-        'order' => new OrderResource($order),
-        'transaction' =>  $order->transactions()::whereType('intent')->first(),
-        'meta' => $driver->data,
+        'order' => $order, //new OrderResource($order),
+        'transaction' =>  $order->transactions()->where('type', 'intent')->first(),
+        'meta' =>  $driver->getData() ?? [],
         'paymentMethod' => $method,
         "paymentMethods" =>  [
             ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
