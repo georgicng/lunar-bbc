@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import NewArrivals from "./blocks/NewArrivals.vue";
+import InfoBox from "./blocks/InfoBox.vue";
 
 const props = defineProps({
   blocks: {
@@ -18,6 +19,7 @@ const sortedBlocks = computed(() => {
 
 const componentMap = {
   newArrivals: NewArrivals,
+  infobox: InfoBox,
 };
 </script>
 

@@ -29,6 +29,16 @@ Route::get('/', function () {
                     ['id' => 3, 'name' => "White crew-Neck T-Shirt", "price" => "29.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
                     ['id' => 4, 'name' => "White crew-Neck T-Shirt", "price" => "49.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
                 ]
+            ],
+            [
+                "id" => 2,
+                "handle" => 'infobox',
+                "sortOrder" =>  2,
+                "features" => [
+                    ['id' => 1, 'title' => "Real-Time Analytics", "caption" => "Get instant insights into your finances with live dashboards", 'icon' => 'realtime',],
+                    ['id' => 2, 'title' => "Bank-Grade Security", "caption" => "End-to-end encryption, 2FA, compliance with GDPR standards.", 'icon' => 'encryption',],
+                    ['id' => 1, 'title' => "Customizable Reports", "caption" => "Export professional, audit-ready financial reports for tax or internal review.", 'icon' => 'reports',],
+                ]
             ]
         ]
     ]);
