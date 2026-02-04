@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Lunar\Facades\CartSession;
 use Lunar\Models\CartLine;
+use Lunar\Models\Order;
+use \Lunar\Facades\Payments;
 
 class OrderService
 {
@@ -58,12 +60,26 @@ class OrderService
         $cart->setShippingOption($option);
     }
 
-    public function fulfill($driver)
+    public function placeOrder($driver)
     {
-        if ($driver === 'teller') {
-            $driver = \Lunar\Facades\Payments::driver($driver);
-            $driver->cart($this->getCart());
-            $driver->authorize();
-        }
+        $driver = Payments::driver($driver);
+        $driver->cart($this->getCart());
+        return [$driver->authorize(), $driver];
+    }
+
+    public function processPayment(string $id, string $transactionId, string $driver): void
+    {
+        $order = Order::find($id);
+        $transaction = $order->transactions()->where('id', $transactionId)->first();
+        $driver = Payments::driver($driver);
+        $driver->order($order);
+        $driver->capture($transaction);
+    }
+
+    public function changePayment(string $id): void
+    {
+        $cart = $this->getCart();
+        $option = \Lunar\Facades\ShippingManifest::getOption($cart, $id);
+        $cart->setShippingOption($option);
     }
 }

@@ -24,7 +24,7 @@ const contact = ref(
         postcode: "",
         contact_email: null,
         contact_phone: null,
-    },
+    }
 );
 const showAddressForm = ref(false);
 const address = computed(() => {
@@ -59,7 +59,15 @@ watch(shippingMethod, async (val) => {
 const paymentMethod = ref("");
 const submit = async () => {
     await router.get(`/checkout/${paymentMethod.value}`);
-}
+};
+
+const canSubmit = computed(() => {
+    return (
+        paymentMethod.value &&
+        shippingMethod.value &&
+        props.cart.data.addresses?.billingAddress
+    );
+});
 </script>
 
 <template>
@@ -215,40 +223,42 @@ const submit = async () => {
                         </button>
                     </div>
                 </div>
+                <template v-if="cart.data.addresses?.billingAddress">
+                    <p className="text-sm font-medium uppercase mt-6">
+                        Shipping Method
+                    </p>
 
-                <p className="text-sm font-medium uppercase mt-6">
-                    Shipping Method
-                </p>
-
-                <select
-                    v-model="shippingMethod"
-                    className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
-                >
-                    <option value="">select shipping</option>
-                    <option
-                        v-for="method in cart.data.shippingMethods"
-                        :value="method.identifier"
+                    <select
+                        v-model="shippingMethod"
+                        className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
                     >
-                        {{ method.name }}
-                    </option>
-                </select>
+                        <option value="">select shipping</option>
+                        <option
+                            v-for="method in cart.data.shippingMethods"
+                            :value="method.identifier"
+                        >
+                            {{ method.name }}
+                        </option>
+                    </select>
+                </template>
+                <template v-if="shippingMethod">
+                    <p className="text-sm font-medium uppercase mt-6">
+                        Payment Method
+                    </p>
 
-                <p className="text-sm font-medium uppercase mt-6">
-                    Payment Method
-                </p>
-
-                <select
-                    v-model="paymentMethod"
-                    className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
-                >
-                    <option value="">select payment mode</option>
-                    <option
-                        v-for="method in cart.data.paymentMethods"
-                        :value="method.id"
+                    <select
+                        v-model="paymentMethod"
+                        className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none"
                     >
-                        {{ method.name }}
-                    </option>
-                </select>
+                        <option value="">select payment mode</option>
+                        <option
+                            v-for="method in cart.data.paymentMethods"
+                            :value="method.id"
+                        >
+                            {{ method.name }}
+                        </option>
+                    </select>
+                </template>
             </div>
 
             <hr className="border-gray-300" />
@@ -275,9 +285,13 @@ const submit = async () => {
             </div>
 
             <button
-            @click="submit"
-            :disabled="paymentMethod != 'teller' || !shippingMethod || !cart.data.addresses?.billingAddress"
-                className="w-full py-3 mt-6 cursor-pointer bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition"
+                @click="submit"
+                :disabled="!canSubmit"
+                class="w-full py-3 mt-6 text-white font-medium"
+                :class="{
+                    'bg-indigo-500 cursor-pointer  hover:bg-indigo-600 transition': canSubmit,
+                    'bg-indigo-300 cursor-not-allowed': !canSubmit,
+                }"
             >
                 Place Order
             </button>

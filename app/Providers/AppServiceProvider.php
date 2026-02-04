@@ -99,8 +99,9 @@ class AppServiceProvider extends ServiceProvider
             return $app->make(Paystack::class);
         });
 
-        Payments::extend('teller', function ($app) {
+        Payments::extend('bank-transfer', function ($app) {
             return $app->make(BankTransfer::class);
         });
     }
+
 }

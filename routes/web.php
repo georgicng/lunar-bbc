@@ -7,9 +7,12 @@ use Inertia\Inertia;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\CartResource;
+use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use App\Http\Requests\CartPostRequest;
 use App\Http\Controllers\PaymentController;
+use Lunar\Models\Order;
+use Lunar\Models\Transaction;
 
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -68,17 +71,28 @@ Route::get('/cart', function (OrderService $service) {
 })->name('cart');
 
 Route::get('/checkout/{method}',  function (OrderService $orderService, string $method) {
-    $orderService->fulfill(
+    [$authorization, $driver] = $orderService->placeOrder(
         $method
     );
-    return to_route('success');
+    $order = Order::find($authorization->orderId);
+    return Inertia::render('Payment', [
+        'order' => new OrderResource($order),
+        'transaction' =>  $order->transactions()::whereType('intent')->first(),
+        'meta' => $driver->data,
+        'paymentMethod' => $method,
+        "paymentMethods" =>  [
+            ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
+            ["id" => "card", "name" => "Pay with Card"],
+            ["id" => "transfer", "name" => "Bank Transfer"]
+        ],
+    ]);
 });
 Route::inertia('/success', 'Success')->name('success');
 
 
 Route::controller(PaymentController::class)->prefix('paystack')->group(function () {
-        Route::get('/redirect', 'redirect')->name('paystack.redirect');
-        Route::get('/success', 'success')->name('paystack.success');
-        Route::get('/cancel', 'cancel')->name('paystack.cancel');
-        Route::get('/pay', 'popup')->name('paystack.popup');
-    });
+    Route::get('/redirect', 'redirect')->name('paystack.redirect');
+    Route::get('/success', 'success')->name('paystack.success');
+    Route::get('/cancel', 'cancel')->name('paystack.cancel');
+    Route::get('/pay', 'popup')->name('paystack.popup');
+});

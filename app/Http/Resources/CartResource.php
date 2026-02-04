@@ -15,10 +15,9 @@ class CartResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $cart = $this->calculate();
         return [
             "id" => $this->id,
-            "lines" => $cart->lines->map(function ($line) {
+            "lines" => $this->lines->map(function ($line) {
                 return [
                     'id' => $line->id,
                     'identifier' => $line->purchasable->getIdentifier(),
@@ -52,8 +51,8 @@ class CartResource extends JsonResource
             "shippingMethods" => \Lunar\Facades\ShippingManifest::getOptions(\Lunar\Facades\CartSession::current()),
             "paymentMethods" =>  [
                 ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
-                ["id" => "paystack", "name" => "Pay with Card"],
-                ["id" => "teller", "name" => "Bank Transfer"]
+                ["id" => "card", "name" => "Pay with Card"],
+                ["id" => "transfer", "name" => "Bank Transfer"]
             ],
             "meta" => [
                 "cities" => City::get()

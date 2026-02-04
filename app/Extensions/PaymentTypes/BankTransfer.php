@@ -34,10 +34,19 @@ class BankTransfer extends AbstractPayment
             'placed_at' => now(),
         ]);
 
+        $this->order->transactions()->create([
+            'type' => 'intent',
+            'amount' => $this->order->total,
+            'status' => 'success',
+            'driver' => 'bank-transfer',
+            'success' => true,
+            'reference' => $this->order->reference,
+        ]);
+
         $response = new PaymentAuthorize(
             success: true,
             orderId: $this->order->id,
-            paymentType: 'teller',
+            paymentType: 'transfer',
         );
 
         PaymentAttemptEvent::dispatch($response);
@@ -50,6 +59,19 @@ class BankTransfer extends AbstractPayment
      */
     public function refund(TransactionContract $transaction, int $amount = 0, $notes = null): PaymentRefund
     {
+        $this->order->update([
+            'status' => 'payment-refunded',
+        ]);
+
+        $this->order->transactions()->create([
+            'parent_transaction_id' => $transaction->id,
+            'type' => 'refund',
+            'amount' => $amount,
+            'status' => 'success',
+            'driver' => 'bank-transfer',
+            'success' => true,
+            'reference' => $transaction->reference,
+        ]);
         return new PaymentRefund(true);
     }
 
@@ -58,6 +80,19 @@ class BankTransfer extends AbstractPayment
      */
     public function capture(TransactionContract $transaction, $amount = 0): PaymentCapture
     {
+        $this->order->update([
+            'status' => 'payment-received',
+        ]);
+
+        $this->order->transactions()->create([
+            'parent_transaction_id' => $transaction->id,
+            'type' => 'capture',
+            'amount' => $amount,
+            'status' => 'success',
+            'driver' => 'bank-transfer',
+            'success' => true,
+            'reference' => $transaction->reference,
+        ]);
         return new PaymentCapture(true);
     }
 }
