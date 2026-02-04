@@ -44,7 +44,7 @@ class Paystack extends AbstractPayment
             'success' => true,
             'reference' => Lib\TransRef::getHashedToken(),
             'card_type' => 'na',
-            'meta' => [ 'billingAddress' => $address]
+            'meta' => ['billingAddress' => $address]
         ]);
 
         $response = new PaymentAuthorize(
@@ -111,7 +111,9 @@ class Paystack extends AbstractPayment
         return $model->isValid($reference);
     }
 
-    public function getData() {
-        return $this->data ?? [];
+    public function getData()
+    {
+        logger()->info('Paystack data', ['data' => $this->data, 'config' => $this->config]);
+        return collect($this->config)->only(['url', 'public']) ?? [];
     }
 }

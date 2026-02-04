@@ -71,21 +71,23 @@ Route::get('/cart', function (OrderService $service) {
 })->name('cart');
 
 Route::get('/checkout/{method}',  function (OrderService $orderService, string $method) {
-    [$authorization, $driver] = $orderService->placeOrder(
+    $authorization = $orderService->placeOrder(
         $method
     );
-    $order = Order::find($authorization->orderId);
-    return Inertia::render('Payment', [
-        'order' => $order, //new OrderResource($order),
-        'transaction' =>  $order->transactions()->where('type', 'intent')->first(),
-        'meta' =>  $driver->getData() ?? [],
-        'paymentMethod' => $method,
-        "paymentMethods" =>  [
-            ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
-            ["id" => "card", "name" => "Pay with Card"],
-            ["id" => "transfer", "name" => "Bank Transfer"]
-        ],
-    ]);
+    return to_route('payment', ['id' => $authorization->orderId, 'method' => $method]);
 });
-Route::inertia('/success', 'Success')->name('success');
 
+Route::get('/payment/{id}',  function (OrderService $orderService, string $id, Request $request) {
+    $order = Order::find($id);
+    $method = $request->query('method');
+    $props = $orderService->preparePayment($order, $method);
+    return Inertia::render(
+        'Payment',
+        [
+            ...$props,
+            'order' => $order, //new OrderResource($order),
+            'paymentMethod' => $method,
+        ]
+    );
+})->name('payment');
+Route::inertia('/success', 'Success')->name('success');

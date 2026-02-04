@@ -64,7 +64,22 @@ class OrderService
     {
         $driver = Payments::driver($driver);
         $driver->cart($this->getCart());
-        return [$driver->authorize(), $driver];
+        return $driver->authorize();
+    }
+
+    public function preparePayment($order, $driver)
+    {
+        $driver = Payments::driver($driver);
+        $driver->order($order);
+        return [
+            'transaction' =>  $order->transactions()->where('type', 'intent')->first(),
+            'meta' =>  $driver->getData() ?? [],
+            "paymentMethods" =>  [
+                ["id" => "cash-in-hand", "name" => "Payment on Delivery"],
+                ["id" => "card", "name" => "Pay with Card"],
+                ["id" => "transfer", "name" => "Bank Transfer"]
+            ],
+        ];
     }
 
     public function processPayment(string $id, string $transactionId, string $driver): void

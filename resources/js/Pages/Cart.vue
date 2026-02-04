@@ -15,15 +15,15 @@ const showAddress = ref(false);
 const contact = ref(
     props.cart.data.addresses?.billingAddress ?? {
         country_id: null,
-        first_name: "",
-        last_name: null,
+        first_name: "George",
+        last_name: "Ikpugbu",
         company_name: null,
         line_one: "",
-        city: "",
+        city: "Lekki",
         state: null,
-        postcode: "",
-        contact_email: null,
-        contact_phone: null,
+        postcode: "12345",
+        contact_email: "gaiprojectz@gmail.com",
+        contact_phone: "08189067546",
     }
 );
 const showAddressForm = ref(false);
