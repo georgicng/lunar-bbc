@@ -3,15 +3,17 @@ import { ref, computed, onMounted } from "vue";
 import Blocks from "../components/Blocks.vue";
 
 const props = defineProps({
-    blocks: {
+    data: {
         type: Object,
-        default: () => [],
+        default: () => ({}),
     },
 });
+
+console.log(props.data);
 </script>
 
 <template>
     <main>
-        <Blocks :blocks="blocks" />
+        <Blocks :blocks="data.blocks" />
     </main>
 </template>

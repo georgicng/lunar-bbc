@@ -10,6 +10,7 @@ use App\Models\Contracts\ProductCustomisation as ProductCustomisationInterface;
 //use Lunar\Models\Product;
 use Lunar\Models\ProductType;
 use App\Models\Product;
+use App\Models\Page;
 use App\Models\ProductCustomisation;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Extensions\Modifiers\CityShippingModifier;
@@ -36,7 +37,8 @@ class AppServiceProvider extends ServiceProvider
                 // Register new Filament Resources
                 Resources\CityResource::class,
                 Resources\PickupCenterResource::class,
-                Resources\CityShippingResource::class
+                Resources\CityShippingResource::class,
+                Resources\PageResource::class
             ])
             ->plugins(
                 [
@@ -68,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
             'order' => \Lunar\Models\Order::class,
             'order_line' => \Lunar\Models\OrderLine::class,
             'product_customisation' => ProductCustomisation::class,
+            'page' => Page::class,
         ]);
 
         ModelManifest::replace(
@@ -80,6 +83,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         AttributeManifest::addtype(ProductCustomisation::class, 'product_customisation');
+        AttributeManifest::addtype(Page::class, 'page');
 
         ProductType::resolveRelationUsing('customisationAttributes', function ($productTypeModel) {
             return $productTypeModel->mappedAttributes()->whereAttributeType(

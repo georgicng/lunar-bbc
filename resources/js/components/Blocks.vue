@@ -5,31 +5,26 @@ import InfoBox from "./blocks/InfoBox.vue";
 
 const props = defineProps({
   blocks: {
-    type: Array,
-    default: () => [],
+    type: Object,
+    default: () => ({}),
   },
 });
 
-const sortedBlocks = computed(() => {
-  if (!props.blocks) {
-    return [];
-  }
-  return [...props.blocks].sort((a, b) => a.sortOrder - b.sortOrder);
-});
+
 
 const componentMap = {
   newArrivals: NewArrivals,
-  infobox: InfoBox,
+  features: InfoBox,
 };
 </script>
 
 
 <template>
   <component
-    v-for="block in sortedBlocks"
-    :key="block.id"
-    :is="componentMap[block.handle]"
-    :block="block"
+    v-for="block in blocks"
+    :key="block.type"
+    :is="componentMap[block.type]"
+    :block="block.data"
   />
 </template>
 

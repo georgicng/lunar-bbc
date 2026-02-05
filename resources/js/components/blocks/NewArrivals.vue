@@ -21,7 +21,7 @@ const props = defineProps({
             <a v-for="product in block.products" href="#" class="group w-56">
                 <img
                     class="rounded-lg w-full group-hover:shadow-xl hover:-translate-y-0.5 duration-300 transition-all h-72 object-cover object-top"
-                    :src="product.image"
+                    :src="product.images[0].url"
                     alt="image"
                 />
                 <p class="text-sm mt-2">{{ product.name }}</p>

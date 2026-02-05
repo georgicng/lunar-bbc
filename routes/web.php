@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Services\ProductService;
 use App\Services\OrderService;
+use App\Services\ContentService;
 use Inertia\Inertia;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
@@ -14,35 +15,10 @@ use App\Http\Controllers\PaymentController;
 use Lunar\Models\Order;
 use Lunar\Models\Transaction;
 
-Route::get('/', function () {
-    return Inertia::render('Home',  [
-        'blocks' => [
-            [
-                "id" => 1,
-                "handle" => 'newArrivals',
-                "title" => "New Arrivals",
-                "subtitle" => "Explore the latest additions to our collection.",
-                "sortOrder" =>  1,
-                "products" => [
-                    ['id' => 1, 'name' => "White crew-Neck T-Shirt", "price" => "29.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
-                    ['id' => 2, 'name' => "White crew-Neck T-Shirt", "price" => "39.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
-                    ['id' => 3, 'name' => "White crew-Neck T-Shirt", "price" => "29.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
-                    ['id' => 4, 'name' => "White crew-Neck T-Shirt", "price" => "49.00", 'image' => 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=500&auto=format&fit=crop',],
-                ]
-            ],
-            [
-                "id" => 2,
-                "handle" => 'infobox',
-                "sortOrder" =>  2,
-                "features" => [
-                    ['id' => 1, 'title' => "Real-Time Analytics", "caption" => "Get instant insights into your finances with live dashboards", 'icon' => 'realtime',],
-                    ['id' => 2, 'title' => "Bank-Grade Security", "caption" => "End-to-end encryption, 2FA, compliance with GDPR standards.", 'icon' => 'encryption',],
-                    ['id' => 1, 'title' => "Customizable Reports", "caption" => "Export professional, audit-ready financial reports for tax or internal review.", 'icon' => 'reports',],
-                ]
-            ]
-        ]
-    ]);
-});
+Route::get('/', function (ContentService $service) {
+    $props = $service->getHome();
+    return Inertia::render('Home',  [ 'data' => $props ]);
+})->name('home');
 
 Route::get('/categories', function (ProductService $service) {
     return Inertia::render('Category', [
