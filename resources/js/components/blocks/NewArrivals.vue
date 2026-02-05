@@ -24,7 +24,7 @@ const props = defineProps({
                     :src="product.images[0].url"
                     alt="image"
                 />
-                <p class="text-sm mt-2">{{ product.name }}</p>
+                <p class="text-sm mt-2">{{ product.data.name.en }}</p>
                 <p class="text-xl">$ {{ product.price }}</p>
             </a>
         </section>
