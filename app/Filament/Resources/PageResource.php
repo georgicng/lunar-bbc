@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Forms\Components\Attributes;
+use App\Forms\Components\Block;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Builder as FormBuilder;
 use Filament\Forms\Components\FileUpload;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Repeater;
+use Lunar\Models\AttributeGroup;
 
 
 class PageResource extends Resource
@@ -32,22 +34,22 @@ class PageResource extends Resource
     {
         return $form
             ->schema([
-               
-                     Forms\Components\Section::make()
+
+                Forms\Components\Section::make()
                     ->schema([
                         static::getMetaAttributeDataFormComponent(),
-            ]),
-            Forms\Components\Section::make()
+                    ]),
+                Forms\Components\Section::make()
                     ->schema([
                         FormBuilder::make('blocks')
-    ->blocks(static::getBlocksAttributeDataFormComponent()),
-            ]),
-            Forms\Components\Section::make()
+                            ->blocks(static::getBlocksAttributeDataFormComponent()),
+                    ]),
+                Forms\Components\Section::make()
                     ->schema([
-                         Forms\Components\Toggle::make('status')
-                    ->required(),
-            ])
-                    
+                        Forms\Components\Toggle::make('status')
+                            ->required(),
+                    ])
+
             ]);
     }
 
@@ -95,7 +97,7 @@ class PageResource extends Resource
         ];
     }
 
-     protected static function getMetaAttributeDataFormComponent(): Component
+    protected static function getMetaAttributeDataFormComponent(): Component
     {
         return Attributes::make()
             ->using(Page::class)
@@ -103,7 +105,20 @@ class PageResource extends Resource
             ->setHook(fn($query) => $query->where('attribute_group_id', 8));
     }
 
-     protected static function getBlocksAttributeDataFormComponent(): array
+    protected static function getAttributeDataFormComponent(): array
+    {
+        return AttributeGroup::where(
+            'attributable_type',
+            'page'
+        )->orderBy('position', 'asc')
+            ->get()
+            ->map(function ($group) {
+                return  FormBuilder\Block::make($group->handle)
+                    ->schema([Block::make()->attributeGroupField($group->id)]);
+            })->toArray();
+    }
+
+    protected static function getBlocksAttributeDataFormComponent(): array
     {
         return  [
             FormBuilder\Block::make('newArrivals')
@@ -111,19 +126,19 @@ class PageResource extends Resource
                     TextInput::make('title')->required(),
                     TextInput::make('subtitle')->required(),
                     Repeater::make('products')
-                    ->schema([
-                        TextInput::make('product')->required(),
-                    ]) 
+                        ->schema([
+                            TextInput::make('product')->required(),
+                        ])
                 ]),
             FormBuilder\Block::make('features')
                 ->schema([
                     Repeater::make('feature')
-                    ->schema([
-                        TextInput::make('name')->required(),
-                        TextInput::make('caption')->required(),
-                        TextInput::make('icon')->required(),
-                    ]) 
+                        ->schema([
+                            TextInput::make('name')->required(),
+                            TextInput::make('caption')->required(),
+                            TextInput::make('icon')->required(),
+                        ])
                 ]),
-    ];
+        ];
     }
 }
