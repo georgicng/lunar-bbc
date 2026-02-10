@@ -62,18 +62,16 @@ class Attributes extends Forms\Components\Group
 
     protected function setUp(): void
     {
-        parent::setUp();        
+        parent::setUp();
 
         if (blank($this->childComponents)) {
             $this->schema(function (\Filament\Forms\Get $get, Livewire $livewire, ?Model $record) {
                 $modelClass = $this->modelClassOverride ?: $livewire::getResource()::getModel();
 
-                $productTypeId = null;
-
                 $morphMap = $modelClass::morphName();
 
                 $attributeQuery = Attribute::where('attribute_type', $morphMap);
-                
+
                 if ($this->hook) {
                     ($this->hook)($attributeQuery);
                 }

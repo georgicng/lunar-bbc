@@ -20,6 +20,9 @@ use App\Extensions\PaymentTypes\BankTransfer;
 use Lunar\Facades\Payments;
 use Outerweb\FilamentSettings\Filament\Plugins\FilamentSettingsPlugin;
 use App\Filament\Resources;
+use Datlechin\FilamentMenuBuilder\FilamentMenuBuilderPlugin;
+use Datlechin\FilamentMenuBuilder\MenuPanel\StaticMenuPanel;
+use Lunar\Admin\Support\Facades\AttributeData;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,8 +47,19 @@ class AppServiceProvider extends ServiceProvider
                 [
                     FilamentSettingsPlugin::make()
                         ->pages([
-                            // Add your settings pages here
+                            \App\Filament\Pages\GeneralSettings::class,
                         ]),
+                    FilamentMenuBuilderPlugin::make()
+                        ->addLocations([
+                            'header' => 'Header',
+                            'footer' => 'Footer',
+                        ])
+                        ->showCustomTextPanel()
+                        ->addMenuPanels([
+                            StaticMenuPanel::make()
+                                ->add('Home', url('/'))
+                                ->add('Blog', url('/blog')),
+                        ])
                 ]
             ))
             ->register();
@@ -84,6 +98,8 @@ class AppServiceProvider extends ServiceProvider
 
         AttributeManifest::addtype(ProductCustomisation::class, 'product_customisation');
         AttributeManifest::addtype(Page::class, 'page');
+        AttributeData::registerFieldType(\App\Extensions\FieldTypes\Repeater::class, \App\Extensions\FieldTypes\Repeater\RepeaterType::class);
+        AttributeData::registerFieldType(\App\Extensions\FieldTypes\RepeaterGroup::class, \App\Extensions\FieldTypes\RepeaterGroup\RepeaterGroupType::class);
 
         ProductType::resolveRelationUsing('customisationAttributes', function ($productTypeModel) {
             return $productTypeModel->mappedAttributes()->whereAttributeType(
@@ -107,5 +123,4 @@ class AppServiceProvider extends ServiceProvider
             return $app->make(BankTransfer::class);
         });
     }
-
 }
