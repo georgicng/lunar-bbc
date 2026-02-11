@@ -1,9 +1,9 @@
 <?php
 namespace App\Extensions\FieldTypes;
 
-use Lunar\FieldTypes\ListField;
+use Lunar\FieldTypes\Text;
 
-class RepeaterGroup extends ListField
+class RepeaterGroup extends Text
 {
     // ...
 }
