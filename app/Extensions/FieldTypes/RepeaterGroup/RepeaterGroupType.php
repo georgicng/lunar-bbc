@@ -21,7 +21,7 @@ class RepeaterGroupType extends BaseFieldType
         return  Repeater::make('feature')
             ->schema([
                 Components\TextInput::make($attribute->handle),
-            ])->min($min)->max($max); //this is to return a repeater with block component
+            ])->minItems($min)->maxItems($max); //this is to return a repeater with block component
 
     }
 

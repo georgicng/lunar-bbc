@@ -22,6 +22,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Repeater;
 use Lunar\Models\AttributeGroup;
+use Lunar\Admin\Support\Facades\AttributeData;
 
 
 class PageResource extends Resource
@@ -42,7 +43,7 @@ class PageResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         FormBuilder::make('blocks')
-                            ->blocks(static::getBlocksAttributeDataFormComponent()),
+                            ->blocks(static::getBlocks()),
                     ]),
                 Forms\Components\Section::make()
                     ->schema([
@@ -105,17 +106,24 @@ class PageResource extends Resource
             ->setHook(fn($query) => $query->where('attribute_group_id', 8));
     }
 
-    protected static function getAttributeDataFormComponent(): array
+    protected static function getBlocks(): array
     {
-        return AttributeGroup::where(
+        $values = AttributeGroup::where(
             'attributable_type',
             'page'
-        )->orderBy('position', 'asc')
+        )
+            ->where('handle', '<>', 'meta')
+            ->orderBy('position', 'asc')
             ->get()
             ->map(function ($group) {
+                $fields = $group->attributes->map(function ($field) {
+                    return AttributeData::getFilamentComponent($field);
+                })->toArray();
                 return  FormBuilder\Block::make($group->handle)
-                    ->schema([Block::make()->attributeGroupField($group->id)]);
+                    ->schema($fields);
             })->toArray();
+        logger()->info($values);
+        return $values;
     }
 
     protected static function getBlocksAttributeDataFormComponent(): array
