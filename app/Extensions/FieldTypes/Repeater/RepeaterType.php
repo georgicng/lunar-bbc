@@ -18,6 +18,7 @@ use Lunar\Admin\Support\FieldTypes\Toggle;
 use Lunar\Admin\Support\FieldTypes\TranslatedText;
 use Lunar\Admin\Support\FieldTypes\Vimeo;
 use Lunar\Admin\Support\FieldTypes\YouTube;
+use App\Facades\ComponentLoader;
 
 class RepeaterType extends BaseFieldType
 {

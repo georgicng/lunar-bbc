@@ -23,6 +23,7 @@ use App\Filament\Resources;
 use Datlechin\FilamentMenuBuilder\FilamentMenuBuilderPlugin;
 use Datlechin\FilamentMenuBuilder\MenuPanel\StaticMenuPanel;
 use Lunar\Admin\Support\Facades\AttributeData;
+use App\Extensions\Form\ComponentLoader;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,10 +32,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+
+        /*  $this->app->scoped('lunar-attribute-data', function (): ComponentLoader {
+            return new ComponentLoader;
+        }); */
+
+        /* $this->app->extend('lunar-attribute-data', function () {
+            return new ComponentLoader;
+        }); */
+
         LunarPanel::extensions([
             \Lunar\Admin\Filament\Resources\ProductResource::class => \App\Extensions\Resources\ProductResource::class,
             \Lunar\Admin\Filament\Resources\ProductTypeResource::class => \App\Extensions\Resources\ProductTypeResource::class,
         ]);
+
         LunarPanel::panel(fn($panel) => $panel
             ->resources([
                 // Register new Filament Resources

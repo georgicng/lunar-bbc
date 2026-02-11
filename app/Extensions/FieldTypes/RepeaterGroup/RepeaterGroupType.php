@@ -9,6 +9,7 @@ use Lunar\Models\AttributeGroup;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Component;
 use Lunar\Admin\Support\Facades\AttributeData;
+use App\Facades\ComponentLoader;
 
 class RepeaterGroupType extends BaseFieldType
 {
@@ -31,8 +32,6 @@ class RepeaterGroupType extends BaseFieldType
             'page'
         )->get()->pluck('name.en', 'id');
 
-        logger()->info(json_encode($options));
-
         return [
             Components\Grid::make(2)->schema([
                 Components\Select::make('group_id')
@@ -49,7 +48,7 @@ class RepeaterGroupType extends BaseFieldType
     {
         $group = AttributeGroup::findOrFail($id);
         $components = $group->attributes->map(function ($field) {
-            return AttributeData::getFilamentComponent($field);
+            return ComponentLoader::getFilamentComponent($field);
         })->toArray();
 
         return Repeater::make($group->handle)

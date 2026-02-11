@@ -25,6 +25,7 @@ class Page extends BaseModel
      */
     protected $casts = [
         'attribute_data' => AsAttributeData::class,
+        'blocks' => 'array'
     ];
 
      public function getMorphClass(): string

@@ -23,6 +23,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Repeater;
 use Lunar\Models\AttributeGroup;
 use Lunar\Admin\Support\Facades\AttributeData;
+use App\Facades\ComponentLoader;
 
 
 class PageResource extends Resource
@@ -117,12 +118,12 @@ class PageResource extends Resource
             ->get()
             ->map(function ($group) {
                 $fields = $group->attributes->map(function ($field) {
-                    return AttributeData::getFilamentComponent($field);
+                    return ComponentLoader::getFilamentComponent($field);
+                    //return AttributeData::getFilamentComponentWOState($field);
                 })->toArray();
                 return  FormBuilder\Block::make($group->handle)
                     ->schema($fields);
             })->toArray();
-        logger()->info($values);
         return $values;
     }
 
