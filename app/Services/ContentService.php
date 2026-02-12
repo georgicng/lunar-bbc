@@ -16,14 +16,14 @@ class ContentService
         $this->blockMap = [ 
             'features' => function (array $block): array { 
                 //logger()->info($block);
-                return  $block['feature'];
+                return  collect($block['feature'])->map(fn ($item) => ['title'=> $item['feature_title'],'caption'=> $item['feature_caption']])->toArray();
             },
             'newArrivals' => function (array $block): array { 
                 return  [
-                    'title' => $block['title'],
-                    'subtitle'=> $block['subtitle'],
-                    'products' => collect($block['products'])->map(function ($product) {
-                        $product = Product::find($product['product']);
+                    'title' => $block['arrival-title'],
+                    'subtitle'=> $block['new-subtitle'],
+                    'products' => collect($block['feature'])->map(function ($product) {
+                        $product = Product::find($product['new-product']);
                         return ProductResource::make($product);
                     })
                 ]; 
@@ -39,10 +39,10 @@ class ContentService
 
     public function resolveBlocks($blocks)
     {
-        $blocks = json_decode($blocks, true);
+        //$blocks = json_decode($blocks, true);
         return collect($blocks)->map(function ($block) {
             
-        logger()->info($this->blockMap);
+            logger()->info($block);
             if (isset($this->blockMap[$block['type']])) {
                 return ['type'=> $block['type'], 'data' => ($this->blockMap[$block['type']])($block['data'])]; 
             }
